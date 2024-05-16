@@ -144,7 +144,7 @@ public class MapFrame extends JFrame {
         FlightPlan fp = new FlightPlan(terraMaster);
         fp.setVisible(true);
         repaint();
-      } else if (a.equals(TerraSyncDirectoryTypes.MODELS.name())) {
+      } else if (a.equals(TerraSyncDirectoryType.MODELS.name())) {
         Collection<Syncable> set = new ArrayList<>();
         set.add(new ModelsSync());
         terraMaster.getTileService().sync(set, false);
@@ -200,18 +200,18 @@ public class MapFrame extends JFrame {
 
     }
 
-    private TerraSyncDirectoryTypes[] getSyncTypes() {
-      ArrayList<TerraSyncDirectoryTypes> types = new ArrayList<>();
+    private TerraSyncDirectoryType[] getSyncTypes() {
+      ArrayList<TerraSyncDirectoryType> types = new ArrayList<>();
 
-      TerraSyncDirectoryTypes[] enumConstants = TerraSyncDirectoryTypes.class.getEnumConstants();
-      for (TerraSyncDirectoryTypes terraSyncDirectoryType : enumConstants) {
+      TerraSyncDirectoryType[] enumConstants = TerraSyncDirectoryType.class.getEnumConstants();
+      for (TerraSyncDirectoryType terraSyncDirectoryType : enumConstants) {
         if (terraSyncDirectoryType.isTile()) {
           if (Boolean.parseBoolean(terraMaster.getProps().getProperty(terraSyncDirectoryType.name(), "false"))) {
             types.add(terraSyncDirectoryType);
           }
         }
       }
-      return types.toArray(new TerraSyncDirectoryTypes[types.size()]);
+      return types.toArray(new TerraSyncDirectoryType[types.size()]);
     }
   }
 

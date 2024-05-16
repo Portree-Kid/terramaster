@@ -182,7 +182,7 @@ public class SettingsDialog extends JDialog {
       gbc_panel.gridy = 2;
       contentPanel.add(panel, gbc_panel);
       panel.setLayout(new GridLayout(0, 3, 0, 0));
-      for (TerraSyncDirectoryTypes type : TerraSyncDirectoryTypes.values()) {
+      for (TerraSyncDirectoryType type : TerraSyncDirectoryType.values()) {
         JCheckBox chckbxTsdt = new JCheckBox(type.name());
         panel.add(chckbxTsdt);
         chckbxTsdt.setSelected(

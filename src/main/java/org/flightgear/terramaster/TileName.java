@@ -19,7 +19,7 @@ public class TileName implements Comparable<TileName>, Serializable, Syncable {
   private String name;
   
   /**The types being synced. Not part of HashCode/Equals!*/
-  private TerraSyncDirectoryTypes[] types;
+  private TerraSyncDirectoryType[] types;
 
   private static HashMap<String, TileName> tilenameMap;
 
@@ -39,12 +39,12 @@ public class TileName implements Comparable<TileName>, Serializable, Syncable {
     this.lat = lat;
     this.lon = lon;
     name = computeTileName(lat, lon);
-    types = new TerraSyncDirectoryTypes[] {TerraSyncDirectoryTypes.TERRAIN};
+    types = new TerraSyncDirectoryType[] {TerraSyncDirectoryType.TERRAIN};
   }
 
   public TileName(String name) {
     this.name = name;
-    types = new TerraSyncDirectoryTypes[] {TerraSyncDirectoryTypes.TERRAIN};    
+    types = new TerraSyncDirectoryType[] {TerraSyncDirectoryType.TERRAIN};
     Pattern p = Pattern.compile("([ew])(\\p{Digit}{3})([ns])(\\p{Digit}{2})");
     Matcher m = p.matcher(name);
     if (m.matches()) {
@@ -234,12 +234,12 @@ public class TileName implements Comparable<TileName>, Serializable, Syncable {
     return true;
   }
 
-  public void setTypes(TerraSyncDirectoryTypes[] t) {
+  public void setTypes(TerraSyncDirectoryType[] t) {
     this.types = t;
   }
 
   @Override
-  public TerraSyncDirectoryTypes[] getTypes() {
+  public TerraSyncDirectoryType[] getTypes() {
     return types;
   }
   

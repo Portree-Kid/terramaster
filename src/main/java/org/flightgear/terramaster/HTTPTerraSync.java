@@ -211,8 +211,8 @@ public class HTTPTerraSync extends Thread implements TileService {
           urls.forEach(element -> downloadStats.put(element, new TileResult(element)));
         }
 
-        TerraSyncDirectoryTypes[] types = n.getTypes();
-        for (TerraSyncDirectoryTypes terraSyncDirectoryType : types) {
+        TerraSyncDirectoryType[] types = n.getTypes();
+        for (TerraSyncDirectoryType terraSyncDirectoryType : types) {
           int updates = 0;
           if (terraSyncDirectoryType.isOsm() && version.equals("o2c")) {
             updates = syncDirectory(terraSyncDirectoryType.getDirname() + n.buildPath(), false, terraSyncDirectoryType);
@@ -362,7 +362,7 @@ public class HTTPTerraSync extends Thread implements TileService {
    * Syncs the given directory.
    */
 
-  private int syncDirectory(String path, boolean force, TerraSyncDirectoryTypes type) {
+  private int syncDirectory(String path, boolean force, TerraSyncDirectoryType type) {
     while (!urls.isEmpty()) {
 
       WeightedUrl baseUrl = getBaseUrl();
@@ -385,7 +385,7 @@ public class HTTPTerraSync extends Thread implements TileService {
 
         if (type.isTile())
           addScnMapTile(terraMaster.getMapScenery(), new File(localBaseDir, path), type);
-        if (type == TerraSyncDirectoryTypes.TERRAIN) {
+        if (type == TerraSyncDirectoryType.TERRAIN) {
           HashSet<String> airports = findAirports(new File(localBaseDir, path));
           ArrayList<Syncable> sync = new ArrayList<>();
           airports.forEach(icaoPart -> sync.add(new AirportsSync(icaoPart)));
@@ -419,7 +419,7 @@ public class HTTPTerraSync extends Thread implements TileService {
     return 0;
   }
 
-  private int processTar(String path, boolean force, TerraSyncDirectoryTypes type) throws IOException {
+  private int processTar(String path, boolean force, TerraSyncDirectoryType type) throws IOException {
     byte[] bs = downloadFile(getBaseUrl(), path + ".txz");
     int updates = 0;
 
@@ -439,7 +439,7 @@ public class HTTPTerraSync extends Thread implements TileService {
     return updates;
   }
 
-  private int processDir(String path, boolean force, TerraSyncDirectoryTypes type)
+  private int processDir(String path, boolean force, TerraSyncDirectoryType type)
       throws IOException, NoSuchAlgorithmException {
     int updates = 0;
     String localDirIndex = readLocalDirIndex(path);
@@ -686,7 +686,7 @@ public class HTTPTerraSync extends Thread implements TileService {
 
   }
 
-  public void addScnMapTile(Map<TileName, TileData> map, File i, TerraSyncDirectoryTypes type) {
+  public void addScnMapTile(Map<TileName, TileData> map, File i, TerraSyncDirectoryType type) {
     TileName n = TileName.getTile(i.getName());
     TileData t = map.get(n);
     if (t == null) {
@@ -702,7 +702,7 @@ public class HTTPTerraSync extends Thread implements TileService {
   }
 
   // given a 10x10 dir, add the 1x1 tiles within to the HashMap
-   void buildScnMap(File dir, Map<TileName, TileData> map, TerraSyncDirectoryTypes type) {
+   void buildScnMap(File dir, Map<TileName, TileData> map, TerraSyncDirectoryType type) {
     File[] tiles = dir.listFiles();
     Pattern p = Pattern.compile("([ew])(\\d{3})([ns])(\\d{2})");
 
@@ -717,15 +717,15 @@ public class HTTPTerraSync extends Thread implements TileService {
    *  builds a HashMap of /Terrain and /Objects
    */
   public Map<TileName, TileData> newScnMap(String path) {
-    List<TerraSyncDirectoryTypes> types = new ArrayList<>();
-    for (TerraSyncDirectoryTypes type : TerraSyncDirectoryTypes.values()) {
+    List<TerraSyncDirectoryType> types = new ArrayList<>();
+    for (TerraSyncDirectoryType type : TerraSyncDirectoryType.values()) {
       if (type.isTile())
         types.add(type);
     }
     Pattern patt = Pattern.compile("([ew])(\\d{3})([ns])(\\d{2})");
     Map<TileName, TileData> map = new HashMap<>(180 * 90);
 
-    for (TerraSyncDirectoryTypes terraSyncDirectoryType : types) {
+    for (TerraSyncDirectoryType terraSyncDirectoryType : types) {
       File d = new File(path + File.separator + terraSyncDirectoryType.getDirname());
       File[] list = d.listFiles();
       if (list != null) {

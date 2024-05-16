@@ -20,10 +20,10 @@ public class TileData {
   /** The square drawn on the map. */
   public Polygon poly;
   /** Flags indicating what the tiles contain. Used for the mouse over. */
-  private final HashSet<TerraSyncDirectoryTypes> directoryTypes;
+  private final HashSet<TerraSyncDirectoryType> directoryTypes;
 
   /** Map with the File objects for the directory types. */
-  private final HashMap<TerraSyncDirectoryTypes, File> dirs;
+  private final HashMap<TerraSyncDirectoryType, File> dirs;
 
   public TileData() {
     directoryTypes = new HashSet<>();
@@ -31,7 +31,7 @@ public class TileData {
   }
 
   public void delete() {
-    for (TerraSyncDirectoryTypes type : TerraSyncDirectoryTypes.values()) {
+    for (TerraSyncDirectoryType type : TerraSyncDirectoryType.values()) {
       if (hasDirectory(type)) {
         deltree(getDir(type));
       }
@@ -67,13 +67,13 @@ public class TileData {
     }
   }
 
-  public synchronized boolean hasDirectory(TerraSyncDirectoryTypes type) {
+  public synchronized boolean hasDirectory(TerraSyncDirectoryType type) {
     return directoryTypes.contains(type);
   }
 
   public synchronized boolean hasAllDirs() {
     boolean hasAll = true;
-    for (TerraSyncDirectoryTypes type : TerraSyncDirectoryTypes.values()) {
+    for (TerraSyncDirectoryType type : TerraSyncDirectoryType.values()) {
       if (type.isTile() && !hasDirectory(type)) {
         hasAll = false;
       }
@@ -81,14 +81,14 @@ public class TileData {
     return hasAll;
   }
 
-  public void setDirTypePath(TerraSyncDirectoryTypes type, File file) {
+  public void setDirTypePath(TerraSyncDirectoryType type, File file) {
     if (file != null && file.exists()) {
       directoryTypes.add(type);
       dirs.put(type, file);
     }
   }
 
-  public File getDir(TerraSyncDirectoryTypes type) {
+  public File getDir(TerraSyncDirectoryType type) {
     return dirs.get(type);
   }
 }

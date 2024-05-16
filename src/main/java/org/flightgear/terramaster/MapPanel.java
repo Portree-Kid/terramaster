@@ -459,12 +459,12 @@ public class MapPanel extends JPanel {
       TileData d = terraMaster.getMapScenery().get(t);
       txt.insert(0, "<html>");
 
-      for (TerraSyncDirectoryTypes type : TerraSyncDirectoryTypes.values()) {
+      for (TerraSyncDirectoryType type : TerraSyncDirectoryType.values()) {
         if (d.hasDirectory(type)) {
           txt.append(" +").append(type.getAbbreviation());
 
-          if (type == TerraSyncDirectoryTypes.TERRAIN) {
-            File f = d.getDir(TerraSyncDirectoryTypes.TERRAIN);
+          if (type == TerraSyncDirectoryType.TERRAIN) {
+            File f = d.getDir(TerraSyncDirectoryType.TERRAIN);
             if (f != null && f.exists()) {
               int count = 0;
               for (String i : f.list()) {

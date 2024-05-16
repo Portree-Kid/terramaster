@@ -21,8 +21,8 @@ public class AirportsSync implements Syncable {
   }
 
   @Override
-  public TerraSyncDirectoryTypes[] getTypes() {
-    return new TerraSyncDirectoryTypes[]{TerraSyncDirectoryTypes.AIRPORTS};
+  public TerraSyncDirectoryType[] getTypes() {
+    return new TerraSyncDirectoryType[]{TerraSyncDirectoryType.AIRPORTS};
   }
 
 }
