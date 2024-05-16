@@ -1,12 +1,6 @@
 package org.flightgear.terramaster;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Polygon;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
@@ -30,8 +24,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JPanel;
-import javax.swing.ToolTipManager;
+import javax.swing.*;
 
 import org.flightgear.terramaster.gshhs.MapPoly;
 
@@ -40,16 +33,13 @@ import com.jhlabs.map.proj.Projection;
 import com.jhlabs.map.proj.WinkelTripelProjection;
 
 /**
- * Panel painting the map.
+ * Panel painting the map
  *
+ * @author keith.paterson
+ * @author Simon
  */
 
 public class MapPanel extends JPanel {
-
-  /**
-   * 
-   *
-   */
 
   private final class MapKeyAdapter extends KeyAdapter {
     private TileName selstart;
@@ -81,7 +71,6 @@ public class MapPanel extends JPanel {
   /**
    * Class holding a point and a distance to make it sortable.
    * @author keith.paterson
-   *
    */
 
   class SortablePoint implements Comparable<SortablePoint> {
@@ -106,7 +95,7 @@ public class MapPanel extends JPanel {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + (int) (d ^ (d >>> 32));
+      result = prime * result + Long.hashCode(d);
       result = prime * result + ((p == null) ? 0 : p.hashCode());
       return result;
     }
@@ -123,11 +112,8 @@ public class MapPanel extends JPanel {
       if (d != other.d)
         return false;
       if (p == null) {
-        if (other.p != null)
-          return false;
-      } else if (!p.equals(other.p))
-        return false;
-      return true;
+        return other.p == null;
+      } else return p.equals(other.p);
     }
 
   }
@@ -207,7 +193,7 @@ public class MapPanel extends JPanel {
       y2 += inc_j;
       for (int i = x1; i != x2; i += inc_i) {
         for (int j = y1; j != y2; j += inc_j) {
-          l.add(new SortablePoint(new Point(i, j), (i - x1) * (i - x1) + (j - y1) * (j - y1)));
+          l.add(new SortablePoint(new Point(i, j), (long) (i - x1) * (i - x1) + (long) (j - y1) * (j - y1)));
         }
       }
       // sort by distance from x1,y1
@@ -287,10 +273,6 @@ public class MapPanel extends JPanel {
     }
   }
 
-  /**
-   * 
-   *
-   */
   class MPAdapter extends ComponentAdapter {
     @Override
     public void componentResized(ComponentEvent e) {
@@ -308,9 +290,7 @@ public class MapPanel extends JPanel {
   }
 
   private List<MapPoly> continents;  
-  private List<MapPoly> borders; 
-  transient BufferedImage map;
-  transient BufferedImage grat;
+  private List<MapPoly> borders;
   transient MouseAdapter mousehandler;
 
   double scale;
@@ -323,21 +303,14 @@ public class MapPanel extends JPanel {
   private double projectionLongitude = Math.toRadians(145);
   private double mapRadius = HALFPI;
   private double fromMetres = 1;
-  public static final int NORTH_POLE = 1;
-  public static final int SOUTH_POLE = 2;
-  public static final int EQUATOR = 3;
-  public static final int OBLIQUE = 4;
-  static final double EPS10 = 1e-10;
   static final double HALFPI = Math.PI / 2;
   static final double TWOPI = Math.PI * 2.0;
-  static final Color sea = new Color(0, 0, 64);
-  static final Color land = new Color(64, 128, 0);
 
-  private Collection<TileName> selectionSet = new LinkedHashSet<TileName>();
+  private final Collection<TileName> selectionSet = new LinkedHashSet<>();
   private int[] dragbox;
   private transient BufferedImage offScreen;
   private TileName cursorTilename;
-  private TerraMaster terraMaster;
+  private final TerraMaster terraMaster;
 
   public MapPanel(TerraMaster terraMaster) {
     this.terraMaster = terraMaster;
@@ -358,9 +331,6 @@ public class MapPanel extends JPanel {
 
   /**
    * Converts screen coordinates to lat/lon point
-   * 
-   * @param n
-   * @return
    */
   public Point2D.Double screen2geo(Point n) {
     if (n == null)
@@ -397,7 +367,7 @@ public class MapPanel extends JPanel {
     double r = pj.getEquatorRadius();
     double w = getWidth();
     double h = getHeight();
-    double i = (h < w ? h : w); // the lesser dimension
+    double i = (Math.min(h, w)); // the lesser dimension
     scale = i / r / 2;
     affine = new AffineTransform();
     affine.translate(w / 2, h / 2);
@@ -427,7 +397,7 @@ public class MapPanel extends JPanel {
     double r = pj.getEquatorRadius();
     double w = getWidth();
     double h = getHeight();
-    double i = (h < w ? h : w); // the lesser dimension
+    double i = (Math.min(h, w)); // the lesser dimension
     scale = i / r / 2;
     affine = new AffineTransform();
     affine.translate(w / 2, h / 2);
@@ -474,59 +444,57 @@ public class MapPanel extends JPanel {
   @Override
   public String getToolTipText(MouseEvent e) {
     Point s = e.getPoint();
-    String txt = "";
-    String str = "";
+    StringBuilder txt = new StringBuilder();
+    StringBuilder str = new StringBuilder();
 
     Double p2 = screen2geo(s);
     TileName t = TileName.getTile(p2);
     if (t != null)
-      txt = t.getName();
+      txt = new StringBuilder(t.getName());
 
     // Is it downloaded?
     if (terraMaster.getMapScenery().containsKey(t)) {
       // list Terr, Obj, airports
 
       TileData d = terraMaster.getMapScenery().get(t);
-      txt = "<html>" + txt;
+      txt.insert(0, "<html>");
 
-      if (d.isTerrain()) {
-        txt += " +Terr";
-        File f = d.getDirTerrain();
-        if (f != null && f.exists()) {
-          int count = 0;
-          for (String i : f.list()) {
-            if (i.endsWith(".btg.gz")) {
-              int n = i.indexOf('.');
-              if (n > 4)
-                n = 4;
-              i = i.substring(0, n);
-              try {
-                Short.parseShort(i);
-              } catch (Exception x) {
-                str += i + " ";
-                if ((++count % 4) == 0)
-                  str += "<br>";
+      for (TerraSyncDirectoryTypes type : TerraSyncDirectoryTypes.values()) {
+        if (d.hasDirectory(type)) {
+          txt.append(" +").append(type.getAbbreviation());
+
+          if (type == TerraSyncDirectoryTypes.TERRAIN) {
+            File f = d.getDir(TerraSyncDirectoryTypes.TERRAIN);
+            if (f != null && f.exists()) {
+              int count = 0;
+              for (String i : f.list()) {
+                if (i.endsWith(".btg.gz")) {
+                  int n = i.indexOf('.');
+                  if (n > 4)
+                    n = 4;
+                  i = i.substring(0, n);
+                  try {
+                    Short.parseShort(i);
+                  } catch (Exception x) {
+                    str.append(i).append(" ");
+                    if ((++count % 4) == 0)
+                      str.append("<br>");
+                  }
+                }
               }
             }
           }
         }
       }
-      if (d.isObjects())
-        txt += " +Obj";
-      if (d.isBuildings())
-        txt += " +Bui";
-      if (d.isPylons())
-        txt += " +Py";
-      if (d.isRoads())
-        txt += " +Rd";
-      if (str.length() > 0)
-        txt += "<br>" + str;
 
-      txt += "</html>";
+      if (str.length() > 0)
+        txt.append("<br>").append(str);
+
+      txt.append("</html>");
       mapFrame.tileindex.setText(t.getName() + " (" + TileName.getTileIndex(p2) + ")");
     }
 
-    return txt;
+    return txt.toString();
   }
 
   public int polyCount() {
@@ -545,9 +513,6 @@ public class MapPanel extends JPanel {
 
   /**
    * capture all 1x1 boxes between press and last (to be drawn by paint() later)
-   * 
-   * @param p1
-   * @param p2
    */
   private void boxSelection(Point2D.Double p1, Point2D.Double p2) {
     if (p1 == null || p2 == null) {
@@ -569,8 +534,6 @@ public class MapPanel extends JPanel {
 
   /**
    * returns union of selectionSet + dragbox
-   * 
-   * @return
    */
 
   Collection<TileName> getSelection() {
@@ -606,8 +569,6 @@ public class MapPanel extends JPanel {
 
   /**
    * Paints the current selection
-   * 
-   * @param g
    */
 
   void showSelection(Graphics g) {
@@ -626,8 +587,7 @@ public class MapPanel extends JPanel {
   void showSyncList(Graphics g) {
     if (terraMaster.getTileService() == null)
       return;
-    Collection<Syncable> a = new ArrayList<>();
-    a.addAll(terraMaster.getTileService().getSyncList())        ;
+    Collection<Syncable> a = new ArrayList<>(terraMaster.getTileService().getSyncList());
     g.setColor(Color.cyan);
     for (Syncable s : a) {
       if (s instanceof TileName) {
@@ -640,7 +600,7 @@ public class MapPanel extends JPanel {
   }
 
   private void enableButtons() {
-    boolean b = selectionSet.size() > 0 ? true : false;
+    boolean b = !selectionSet.isEmpty();
     mapFrame.butSync.setEnabled(b);
     mapFrame.butDelete.setEnabled(b);
     mapFrame.butSearch.setEnabled(b);
@@ -727,8 +687,6 @@ public class MapPanel extends JPanel {
 
   /**
    * Shows the downloaded tiles
-   * 
-   * @param g0
    */
 
   void showTiles(Graphics g0) {
@@ -741,7 +699,7 @@ public class MapPanel extends JPanel {
     if (terraMaster.getMapScenery() == null)
       return;
     Set<TileName> keys = terraMaster.getMapScenery().keySet();
-    Pattern p = Pattern.compile("([ew])(\\p{Digit}{3})([ns])(\\p{Digit}{2})");
+    Pattern p = Pattern.compile("([ew])(\\d{3})([ns])(\\d{2})");
 
     for (TileName n : keys) {
       if (n == null)
@@ -757,7 +715,7 @@ public class MapPanel extends JPanel {
         TileData t = terraMaster.getMapScenery().get(n);
         t.poly = poly;
         if (poly != null) {
-          if (t.isTerrain() && t.isObjects())
+          if (t.hasAllDirs())
             g.setColor(Color.green);
           else
             g.setColor(Color.yellow);
@@ -769,8 +727,6 @@ public class MapPanel extends JPanel {
 
   /**
    * Shows the airports on the map
-   * 
-   * @param g0
    */
   void showAirports(Graphics g0) {
     if (terraMaster.getFgmap() == null)
@@ -806,8 +762,6 @@ public class MapPanel extends JPanel {
 
   /**
    * draws the landmass. filter by polygon size and zoom
-   * 
-   * @param g
    */
   void showLandmass(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
@@ -854,8 +808,6 @@ public class MapPanel extends JPanel {
       if (inside(x, y)) {
         project(x, y, p);
         d.addPoint((int) p.x, (int) p.y);
-      } else {
-        // XXX
       }
     }
     return d;
@@ -876,8 +828,6 @@ public class MapPanel extends JPanel {
         xpoints[j] = (int) p.x;
         ypoints[j] = (int) p.y;
         ++j;
-      } else {
-        // XXX
       }
     }
     return j;
@@ -885,10 +835,6 @@ public class MapPanel extends JPanel {
 
   /**
    * Projects the given point on the globe.
-   * 
-   * @param lam
-   * @param phi
-   * @param d
    */
 
   void project(double lam, double phi, Point2D.Double d) {

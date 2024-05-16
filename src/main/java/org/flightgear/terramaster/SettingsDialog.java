@@ -6,55 +6,39 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import org.flightgear.terramaster.dns.FlightgearNAPTRQuery;
 import org.flightgear.terramaster.dns.FlightgearNAPTRQuery.HealthStats;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
+/**
+ * Settings dialog of the GUI
+ *
+ * @author keith.paterson
+ * @author Simon
+ */
 
 public class SettingsDialog extends JDialog {
 
   transient Logger log = Logger.getLogger(getClass().getName());
-  private final JPanel contentPanel = new JPanel();
-  private JTextField txtScenerypath;
-  private JComboBox<String> cmbSceneryVersion;
-  private final Action action = new SwingAction();
-  private JCheckBox chckbxTerrain;
-  private JCheckBox chckbxObjects;
-  private JCheckBox chckbxBuildings;
-  private ArrayList<Level> levels = new ArrayList<>();
-  private JComboBox<Level> cmbLogLevel;
+  private final JTextField txtScenerypath;
+  private final JList<String> cmbSceneryVersion;
+  private final Vector<String> versions;
+  private final ArrayList<Level> levels = new ArrayList<>();
+  private final JComboBox<Level> cmbLogLevel;
   private Logger root;
-  private JTextField tileage;
-  private JCheckBox checkBoxGoogle;
-  private JCheckBox checkBoxGCA;
-  private TerraMaster terraMaster;
-  private JCheckBox chckbxRoads;
-  private JCheckBox chckbxPylons;
+  private final JTextField tileage;
+  private final JCheckBox checkBoxGoogle;
+  private final JCheckBox checkBoxGCA;
+  private final TerraMaster terraMaster;
 
   {
     levels.add(Level.ALL);
@@ -67,8 +51,6 @@ public class SettingsDialog extends JDialog {
 
   /**
    * Create the dialog.
-   * 
-   * @param terraMaster
    */
   public SettingsDialog(TerraMaster terraMaster) {
     this.terraMaster = terraMaster;
@@ -76,6 +58,7 @@ public class SettingsDialog extends JDialog {
     setModal(true);
     setBounds(100, 100, 466, 327);
     getContentPane().setLayout(new BorderLayout());
+    JPanel contentPanel = new JPanel();
     contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
     getContentPane().add(contentPanel, BorderLayout.CENTER);
     GridBagLayout gbl_contentPanel = new GridBagLayout();
@@ -108,19 +91,17 @@ public class SettingsDialog extends JDialog {
       txtScenerypath.setText((String) terraMaster.getProps().get(TerraMasterProperties.SCENERY_PATH));
     }
     final JButton selectDirectoryButton = new JButton("...");
-    selectDirectoryButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        JFileChooser fc = new JFileChooser();
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        fc.setCurrentDirectory(new File(txtScenerypath.getText()));
+    selectDirectoryButton.addActionListener(e -> {
+      JFileChooser fc = new JFileChooser();
+      fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      fc.setCurrentDirectory(new File(txtScenerypath.getText()));
 
-        if (fc.showOpenDialog(selectDirectoryButton) == JFileChooser.APPROVE_OPTION) {
-          File f = fc.getSelectedFile();
-          fc.setCurrentDirectory(f);
-          txtScenerypath.setText(f.getAbsolutePath());
-        }
-
+      if (fc.showOpenDialog(selectDirectoryButton) == JFileChooser.APPROVE_OPTION) {
+        File f = fc.getSelectedFile();
+        fc.setCurrentDirectory(f);
+        txtScenerypath.setText(f.getAbsolutePath());
       }
+
     });
     GridBagConstraints gbc_selectDirectoryButton = new GridBagConstraints();
     gbc_selectDirectoryButton.insets = new Insets(0, 0, 5, 0);
@@ -142,12 +123,10 @@ public class SettingsDialog extends JDialog {
       getContentPane().add(buttonPane, BorderLayout.SOUTH);
       {
         JButton okButton = new JButton("OK");
-        okButton.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            setVisible(false);
-            saveValues();
+        okButton.addActionListener(e -> {
+          setVisible(false);
+          saveValues();
 
-          }
         });
         okButton.setActionCommand("OK");
         buttonPane.add(okButton);
@@ -155,56 +134,37 @@ public class SettingsDialog extends JDialog {
       }
       {
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            setVisible(false);
-          }
-        });
+        cancelButton.addActionListener(e -> setVisible(false));
         cancelButton.setActionCommand("Cancel");
         buttonPane.add(cancelButton);
       }
     }
     {
-      {
-        cmbSceneryVersion = new JComboBox();
-        cmbSceneryVersion.setSelectedItem(terraMaster.getProps().getProperty(TerraMasterProperties.SERVER_TYPE));
-        GridBagConstraints gbc_cmbSceneryVersion = new GridBagConstraints();
-        gbc_cmbSceneryVersion.insets = new Insets(0, 0, 5, 5);
-        gbc_cmbSceneryVersion.fill = GridBagConstraints.HORIZONTAL;
-        gbc_cmbSceneryVersion.gridx = 1;
-        gbc_cmbSceneryVersion.gridy = 1;
-        contentPanel.add(cmbSceneryVersion, gbc_cmbSceneryVersion);
-        new Thread(new Runnable() {
+      versions = new Vector<>();
+      cmbSceneryVersion = new JList<>();
+      cmbSceneryVersion.setSelectedValue(terraMaster.getProps().getProperty(TerraMasterProperties.SERVER_TYPE), false);
+      GridBagConstraints gbc_cmbSceneryVersion = new GridBagConstraints();
+      gbc_cmbSceneryVersion.insets = new Insets(0, 0, 5, 5);
+      gbc_cmbSceneryVersion.fill = GridBagConstraints.HORIZONTAL;
+      gbc_cmbSceneryVersion.gridx = 1;
+      gbc_cmbSceneryVersion.gridy = 1;
+      contentPanel.add(cmbSceneryVersion, gbc_cmbSceneryVersion);
+      new Thread(() -> {
+        FlightgearNAPTRQuery query = new FlightgearNAPTRQuery(terraMaster);
+        query.queryDNSServer("Any String");
 
-          @Override
-          public void run() {
-            FlightgearNAPTRQuery query = new FlightgearNAPTRQuery(terraMaster);
-            query.queryDNSServer(terraMaster.getProps().getProperty(TerraMasterProperties.SCENERY_VERSION,
-                TerraMasterProperties.DEFAULT_SCENERY_VERSION));
-
-            for (String version : query.getVersions()) {
-              cmbSceneryVersion.addItem(version);
-            }
-            for (Entry<String, HealthStats> entry : query.getStats().entrySet()) {
-              log.fine(entry.getValue().toString());
-            }
-            restoreValues();
+        for (String version : query.getTypes()) {
+          if (!versions.contains(version)) {
+            versions.add(version);
           }
-        }).start();
-
-      }
+        }
+        for (Entry<String, HealthStats> entry : query.getStats().entrySet()) {
+          log.fine(entry.getValue().toString());
+        }
+        cmbSceneryVersion.setListData(versions);
+        restoreValues();
+      }).start();
     }
-    JButton addSettingsButton = new JButton("...");
-    addSettingsButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-
-      }
-    });
-    GridBagConstraints gbc_addSettingsButton = new GridBagConstraints();
-    gbc_addSettingsButton.insets = new Insets(0, 0, 5, 0);
-    gbc_addSettingsButton.gridx = 2;
-    gbc_addSettingsButton.gridy = 1;
-    contentPanel.add(addSettingsButton, gbc_addSettingsButton);
     {
       JLabel lblNewLabel = new JLabel("Sync");
       GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -221,36 +181,14 @@ public class SettingsDialog extends JDialog {
       gbc_panel.gridx = 1;
       gbc_panel.gridy = 2;
       contentPanel.add(panel, gbc_panel);
-      panel.setLayout(new GridLayout(3, 2, 0, 0));
-      {
-        chckbxTerrain = new JCheckBox("Terrain");
-        panel.add(chckbxTerrain);
-        chckbxTerrain.setSelected(
-            Boolean.parseBoolean(terraMaster.getProps().getProperty(TerraSyncDirectoryTypes.TERRAIN.name(), "false")));
-      }
-      {
-        chckbxPylons = new JCheckBox("Pylons");
-        panel.add(chckbxPylons);
-        chckbxPylons.setSelected(
-            Boolean.parseBoolean(terraMaster.getProps().getProperty(TerraSyncDirectoryTypes.PYLONS.name(), "false")));
-      }
-      {
-        chckbxBuildings = new JCheckBox("Buildings");
-        panel.add(chckbxBuildings);
-        chckbxBuildings.setSelected(Boolean
-            .parseBoolean(terraMaster.getProps().getProperty(TerraSyncDirectoryTypes.BUILDINGS.name(), "false")));
-      }
-      {
-        chckbxRoads = new JCheckBox("Roads");
-        panel.add(chckbxRoads);
-        chckbxRoads.setSelected(
-            Boolean.parseBoolean(terraMaster.getProps().getProperty(TerraSyncDirectoryTypes.ROADS.name(), "false")));
-      }
-      {
-        chckbxObjects = new JCheckBox("Objects");
-        panel.add(chckbxObjects);
-        chckbxObjects.setSelected(
-            Boolean.parseBoolean(terraMaster.getProps().getProperty(TerraSyncDirectoryTypes.OBJECTS.name(), "false")));
+      panel.setLayout(new GridLayout(0, 3, 0, 0));
+      for (TerraSyncDirectoryTypes type : TerraSyncDirectoryTypes.values()) {
+        JCheckBox chckbxTsdt = new JCheckBox(type.name());
+        panel.add(chckbxTsdt);
+        chckbxTsdt.setSelected(
+                Boolean.parseBoolean(terraMaster.getProps().getProperty(type.name(), "false")));
+        chckbxTsdt.addActionListener(e -> terraMaster.getProps().setProperty(type.name(),
+                Boolean.toString(chckbxTsdt.isSelected())));
       }
     }
     {
@@ -263,30 +201,25 @@ public class SettingsDialog extends JDialog {
       contentPanel.add(lblLogLevel, gbc_lblLogLevel);
     }
     {
-      cmbLogLevel = new JComboBox<Level>();
-      cmbLogLevel.addPropertyChangeListener(new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent evt) {
-          if (root != null)
-            root.setLevel(cmbLogLevel.getItemAt(cmbLogLevel.getSelectedIndex()));
-        }
+      cmbLogLevel = new JComboBox<>();
+      cmbLogLevel.addPropertyChangeListener(evt -> {
+        if (root != null)
+          root.setLevel(cmbLogLevel.getItemAt(cmbLogLevel.getSelectedIndex()));
       });
-      cmbLogLevel.addActionListener(new ActionListener() {
-
-        public void actionPerformed(ActionEvent e) {
-          Level newLevell = cmbLogLevel.getItemAt(cmbLogLevel.getSelectedIndex());
-          root.setLevel(newLevell);
-          LogManager manager = LogManager.getLogManager();
-          Enumeration<String> loggers = manager.getLoggerNames();
-          while (loggers.hasMoreElements()) {
-            String logger = (String) loggers.nextElement();
-            Logger logger2 = manager.getLogger(logger);
-            if (logger2 != null && logger2.getLevel() != null) {
-              logger2.setLevel(newLevell);
-            }
+      cmbLogLevel.addActionListener(e -> {
+        Level newLevell = cmbLogLevel.getItemAt(cmbLogLevel.getSelectedIndex());
+        root.setLevel(newLevell);
+        LogManager manager = LogManager.getLogManager();
+        Enumeration<String> loggers = manager.getLoggerNames();
+        while (loggers.hasMoreElements()) {
+          String logger = loggers.nextElement();
+          Logger logger2 = manager.getLogger(logger);
+          if (logger2 != null && logger2.getLevel() != null) {
+            logger2.setLevel(newLevell);
           }
         }
       });
-      cmbLogLevel.setModel(new DefaultComboBoxModel<Level>(levels.toArray(new Level[levels.size()])));
+      cmbLogLevel.setModel(new DefaultComboBoxModel<>(levels.toArray(new Level[0])));
       GridBagConstraints gbc_cmbLogLevel = new GridBagConstraints();
       gbc_cmbLogLevel.insets = new Insets(0, 0, 5, 5);
       gbc_cmbLogLevel.fill = GridBagConstraints.HORIZONTAL;
@@ -361,17 +294,15 @@ public class SettingsDialog extends JDialog {
     tileage
         .setText("" + (Integer.parseInt(terraMaster.getProps().getProperty(TerraMasterProperties.MAX_TILE_AGE, "100"))
             / (24 * 3600)));
-    boolean defaultAdded = false;
-    for (int i = 0; i < cmbSceneryVersion.getItemCount(); i++) {
-      String item = cmbSceneryVersion.getItemAt(i);
-      defaultAdded |= (TerraMasterProperties.DEFAULT_SCENERY_VERSION.equals(item));
+    List<Integer> indicies = new ArrayList<>();
+    for (String version : terraMaster.getProps().getProperty(TerraMasterProperties.SCENERY_VERSION,
+            TerraMasterProperties.DEFAULT_SCENERY_VERSION).split(",")) {
+      for (int i = 0; i < cmbSceneryVersion.getModel().getSize(); i++) {
+        if (cmbSceneryVersion.getModel().getElementAt(i).equals(version))
+          indicies.add(i);
+      }
     }
-    if (!defaultAdded) {
-      cmbSceneryVersion.addItem(terraMaster.getProps().getProperty(TerraMasterProperties.SCENERY_VERSION,
-          TerraMasterProperties.DEFAULT_SCENERY_VERSION));
-    }
-    cmbSceneryVersion.setSelectedItem(terraMaster.getProps().getProperty(TerraMasterProperties.SCENERY_VERSION,
-        TerraMasterProperties.DEFAULT_SCENERY_VERSION));
+    cmbSceneryVersion.setSelectedIndices(indicies.stream().mapToInt(Integer::intValue).toArray());
     checkBoxGoogle.setSelected(
         Boolean.parseBoolean(terraMaster.getProps().getProperty(TerraMasterProperties.DNS_GOOGLE, "false")));
     checkBoxGCA
@@ -380,44 +311,21 @@ public class SettingsDialog extends JDialog {
 
   private void saveValues() {
     try {
+      String versionsString = String.join(",", versions);
       terraMaster.setMapScenery(terraMaster.getTileService().newScnMap(txtScenerypath.getText()));
       terraMaster.frame.map.repaint();
       terraMaster.getProps().setProperty(TerraMasterProperties.SCENERY_PATH, txtScenerypath.getText());
-      terraMaster.getProps().setProperty(TerraMasterProperties.SERVER_TYPE,
-          (String) cmbSceneryVersion.getSelectedItem());
+      terraMaster.getProps().setProperty(TerraMasterProperties.SERVER_TYPE, versionsString);
       terraMaster.getTileService().setScnPath(new File(txtScenerypath.getText()));
-      terraMaster.getProps().setProperty(TerraSyncDirectoryTypes.TERRAIN.name(),
-          Boolean.toString(chckbxTerrain.isSelected()));
-      terraMaster.getProps().setProperty(TerraSyncDirectoryTypes.OBJECTS.name(),
-          Boolean.toString(chckbxObjects.isSelected()));
-      terraMaster.getProps().setProperty(TerraSyncDirectoryTypes.BUILDINGS.name(),
-          Boolean.toString(chckbxBuildings.isSelected()));
-      terraMaster.getProps().setProperty(TerraSyncDirectoryTypes.PYLONS.name(),
-          Boolean.toString(chckbxPylons.isSelected()));
-      terraMaster.getProps().setProperty(TerraSyncDirectoryTypes.ROADS.name(),
-          Boolean.toString(chckbxRoads.isSelected()));
       terraMaster.getProps().setProperty(TerraMasterProperties.MAX_TILE_AGE,
           "" + (Integer.parseInt(tileage.getText()) * 24 * 3600));
-      terraMaster.getProps().setProperty(TerraMasterProperties.SCENERY_VERSION,
-          cmbSceneryVersion.getSelectedItem().toString());
+      terraMaster.getProps().setProperty(TerraMasterProperties.SCENERY_VERSION, versionsString);
       terraMaster.getProps().setProperty(TerraMasterProperties.DNS_GOOGLE,
           Boolean.toString(checkBoxGoogle.isSelected()));
       terraMaster.getProps().setProperty(TerraMasterProperties.DNS_GCA, Boolean.toString(checkBoxGCA.isSelected()));
       terraMaster.setTileService();
     } catch (Exception x) {
       log.log(Level.WARNING, x.toString(), x);
-    }
-  }
-
-  private class SwingAction extends AbstractAction {
-    public SwingAction() {
-      putValue(NAME, "Terrain");
-      putValue(SHORT_DESCRIPTION, "Some short description");
-    }
-
-    public void actionPerformed(ActionEvent e) {
-      if (chckbxObjects.isSelected())
-        chckbxTerrain.setSelected(true);
     }
   }
 }

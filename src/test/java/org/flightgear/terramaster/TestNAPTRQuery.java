@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import org.flightgear.terramaster.TerraMaster;
-import org.flightgear.terramaster.TerraMasterProperties;
 import org.flightgear.terramaster.dns.FlightgearNAPTRQuery;
 import org.flightgear.terramaster.dns.WeightedUrl;
 import org.flightgear.terramaster.dns.FlightgearNAPTRQuery.HealthStats;
@@ -62,7 +60,7 @@ public class TestNAPTRQuery {
     List<WeightedUrl> server = q.queryDNSServer("ws20");
     assertNotNull(server);
     assertNotEquals(0, server.size());
-    String[] v = q.getVersions();
+    String[] v = q.getTypes();
     assertNotNull(v);
     assertNotEquals(0, v.length);
 
@@ -76,7 +74,7 @@ public class TestNAPTRQuery {
     List<WeightedUrl> server = q.queryDNSServer("ws20");
     assertNotNull(server);
     assertNotEquals(0, server.size());
-    String[] v = q.getVersions();
+    String[] v = q.getTypes();
     assertNotNull(v);
     assertNotEquals(0, v.length);
     // Now we have a response

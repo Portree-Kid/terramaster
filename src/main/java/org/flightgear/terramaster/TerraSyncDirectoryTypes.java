@@ -1,35 +1,49 @@
 package org.flightgear.terramaster;
-import java.io.File;
 
 /**
- * The subdirectories that TerraMaster supports in the directory. 
- * @author keith.paterson
+ * The subdirectories that TerraMaster supports in the directory
  *
+ * @author keith.paterson
+ * @author Simon
  */
 
 public enum TerraSyncDirectoryTypes {
 
-  TERRAIN("Terrain", 0, true), OBJECTS("Objects", 1, true), MODELS("Models",
-      2, false), AIRPORTS("Airports", 3, false), BUILDINGS("Buildings", 4, false), PYLONS("Pylons", 4, true), ROADS("Roads", 4, true);
+  TERRAIN("Terrain", true, false, "Terr"),
+  OBJECTS("Objects", true, false, "Obj"),
+  MODELS("Models", false, false, ""),
+  AIRPORTS("Airports", false, false, ""),
+  BUILDINGS("Buildings", true, true, "Bui"),
+  PYLONS("Pylons", true, true, "Py"),
+  ROADS("Roads", true, true, "Rd"),
+  DETAILS("Details", true, true, "Det"),
+  TREES("Trees", true, true, "Trs");
 
-  private String dirname = null;
-  private boolean tile;
+  private final String name;
+  private final boolean tile;
+  private final boolean osm;
+  private final String abbreviation;
   
   public synchronized boolean isTile() {
     return tile;
   }
 
-  TerraSyncDirectoryTypes(String name, int index, boolean tile) {
-    this.setDirname(name + "/");
+  public synchronized boolean isOsm() {
+    return osm;
+  }
+
+  TerraSyncDirectoryTypes(String name, boolean tile, boolean osm, String abbreviation) {
+    this.name = name;
     this.tile = tile;
+    this.osm = osm;
+    this.abbreviation = abbreviation;
   }
 
   public String getDirname() {
-    return dirname;
+    return name + "/";
   }
 
-  public void setDirname(String dirname) {
-    this.dirname = dirname;
+  public String getAbbreviation() {
+    return abbreviation;
   }
-
 }
