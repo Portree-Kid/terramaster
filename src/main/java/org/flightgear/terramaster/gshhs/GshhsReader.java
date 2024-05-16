@@ -35,8 +35,6 @@ public class GshhsReader {
 
   /**
    * reads in GSHHS and builds ArrayList of polys
-   * @param filename
-   * @return
    */
 
   public ArrayList<MapPoly> newPolyList(String filename) {

@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 /**
  * this class handles webqueries and returns results it keeps a per-session
  * HashMap of known airports It queries the multiplayer map.
- * {@link http://mpmap02.flightgear.org/fg_nav_xml_proxy.cgi?sstr=wbks&apt_code}
+ * {@link <a href="https://mpmap02.flightgear.org/fg_nav_xml_proxy.cgi?sstr=wbks&apt_code">mpmap02</a>}
  */
 
 public class FGMap extends Observable implements AirportResult {

@@ -23,7 +23,7 @@ public class TileName implements Comparable<TileName>, Serializable, Syncable {
 
   private static HashMap<String, TileName> tilenameMap;
 
-  /** creates a hashtable of all possible 1x1 tiles in the world */
+  // creates a hashtable of all possible 1x1 tiles in the world
   static {
     tilenameMap = new HashMap<>();
 
@@ -125,8 +125,6 @@ public class TileName implements Comparable<TileName>, Serializable, Syncable {
 
   /**
    * given a 1x1 tile, figure out the parent 10x10 container return the 10/1 path
-   * 
-   * @return
    */
   public String buildPath() {
     if (name.length() < 7)
@@ -156,7 +154,6 @@ public class TileName implements Comparable<TileName>, Serializable, Syncable {
    * Returns a TileIndex for the given lat/lon
    * @see <a href="http://wiki.flightgear.org/Tile_Index_Scheme">http://wiki.flightgear.org/Tile_Index_Scheme</a>
    * @param p (x lon, y lat)
-   * @return
    */
 
   public static int getTileIndex(Point2D.Double p) {
@@ -179,8 +176,6 @@ public class TileName implements Comparable<TileName>, Serializable, Syncable {
   
   /**
    * Get the amount of a tile is covered by one tileindex.
-   * @param p
-   * @return
    */
 
   public static double getTileWidth(Double p) {
