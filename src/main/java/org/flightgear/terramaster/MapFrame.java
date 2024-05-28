@@ -1,7 +1,6 @@
 package org.flightgear.terramaster;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -30,12 +29,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -54,9 +51,8 @@ public class MapFrame extends JFrame {
 
   /**
    * Callback notifying us of a {@link WebWorker} result
-   * 
-   * @author keith.paterson
    *
+   * @author keith.paterson
    */
 
   public class SearchbarObserver implements Observer {
@@ -73,19 +69,18 @@ public class MapFrame extends JFrame {
     }
   }
 
+  private static final String PREFS = "PREFS";
+  private static final String SHARED = "SHARED";
   private static final String FLIGHTPLAN = "FLIGHTPLAN";
   private static final String SYNC_OLD = "SYNC_OLD";
   private static final String SYNC = "SYNC";
 
   /**
    * This Adapter is used by the child elements to receive Events
-   * 
-   * @author keith.paterson
    *
+   * @author keith.paterson
    */
   public class MFAdapter extends ComponentAdapter implements ActionListener {
-
-    private static final String PREFS = "PREFS";
 
     @Override
     public void componentMoved(ComponentEvent e) {
@@ -94,19 +89,6 @@ public class MapFrame extends JFrame {
 
     @Override
     public void componentResized(ComponentEvent e) {
-      // tileName.setLocation( 20, 10);
-      // butSync.setLocation( 90-1, 7);
-      // butDelete.setLocation(115-1, 7);
-      // butSearch.setLocation(140-1, 7);
-      // butStop.setLocation(165-1, 7);
-      // butModels.setLocation(190-1, 7);
-      // butClear.setLocation(220-1, 7);
-      // butReset.setLocation(245-1, 7);
-      // butPrefs.setLocation(270-1, 7);
-      // search.setLocation(300, 10);
-      // searchBar.setLocation(345, 10);
-      // progressBar.setLocation(470, 9);
-      // map.setLocation(0, 40);
       map.setSize(getWidth(), getHeight() - 40);
       storeSettings();
     }
@@ -130,10 +112,10 @@ public class MapFrame extends JFrame {
           i.setTypes(getSyncTypes());
           set.add(i);
         });
-        if(set.size() == 0) {
-          set.addAll(terraMaster.getMapScenery().keySet());          
+        if (set.isEmpty()) {
+          set.addAll(terraMaster.getMapScenery().keySet());
         }
-        
+
         terraMaster.getTileService().sync(set, true);
         progressBar.setMaximum(progressBar.getMaximum() + set.size() * 2);
         progressBar.setVisible(true);
@@ -144,44 +126,33 @@ public class MapFrame extends JFrame {
         FlightPlan fp = new FlightPlan(terraMaster);
         fp.setVisible(true);
         repaint();
-      } else if (a.equals(TerraSyncDirectoryType.MODELS.name())) {
+      } else if (a.equals(SHARED)) {
         Collection<Syncable> set = new ArrayList<>();
         set.add(new ModelsSync());
+        set.add(new AirportsSync());
         terraMaster.getTileService().sync(set, false);
-        progressBar.setMaximum(progressBar.getMaximum() + set.size() * 1);
+        progressBar.setMaximum(progressBar.getMaximum() + set.size());
         progressBar.setVisible(true);
         butStop.setEnabled(true);
-      } else
-
-      if (a.equals("DELETE")) {
+      } else if (a.equals("DELETE")) {
         terraMaster.getTileService().delete(map.getSelection());
         map.clearSelection();
         repaint();
-      } else
-
-      if (a.equals("RESET")) {
+      } else if (a.equals("RESET")) {
         map.toggleProj();
         repaint();
-      } else
-
-      if (a.equals("STOP")) {
+      } else if (a.equals("STOP")) {
         terraMaster.getTileService().cancel();
-      } else
-
-      if (a.equals("CLEAR")) {
+      } else if (a.equals("CLEAR")) {
         terraMaster.getFgmap().clearAirports();
         repaint();
-      } else
-
-      if (a.equals(PREFS)) {
+      } else if (a.equals(PREFS)) {
         SettingsDialog settingsDialog = new SettingsDialog(terraMaster);
         settingsDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         settingsDialog.setVisible(true);
         map.repaint();
-      } else
-
-      if (a.equals("SEARCH")) {
+      } else if (a.equals("SEARCH")) {
         Object selectedItem = searchBar.getSelectedItem();
         if (selectedItem instanceof String) {
           new WebWorker((String) selectedItem, terraMaster.getFgmap()).execute();
@@ -189,15 +160,10 @@ public class MapFrame extends JFrame {
           setProjection(((Airport) selectedItem).lat, ((Airport) selectedItem).lon);
           repaint();
         }
-      } else
-
-      if (a.equals("BROWSE")) {
+      } else if (a.equals("BROWSE")) {
         Collection<TileName> sel = map.getSelection();
         new WebWorker(sel, terraMaster.getFgmap()).execute();
-      } else {
-
       }
-
     }
 
     private TerraSyncDirectoryType[] getSyncTypes() {
@@ -211,25 +177,19 @@ public class MapFrame extends JFrame {
           }
         }
       }
-      return types.toArray(new TerraSyncDirectoryType[types.size()]);
+      return types.toArray(new TerraSyncDirectoryType[0]);
     }
   }
 
   MapPanel map;
-  JComboBox searchBar;
+  JComboBox<Airport> searchBar;
   JLabel tileName;
   JLabel search;
   JButton butSync, butDelete, butStop, butModels, butReset, butClear, butPrefs, butSearch;
-  JFileChooser fc = new JFileChooser();
   JProgressBar progressBar;
-  private JPanel panel;
   static Logger log = Logger.getLogger(TerraMaster.LOGGER_CATEGORY);
-  private JButton butInfo;
-  private JButton butSyncOld;
-  private JButton addFlightplan;
-  private JPanel bottomPanel;
   JTextField tileindex;
-  private transient TerraMaster terraMaster;
+  private final transient TerraMaster terraMaster;
 
   public MapFrame(TerraMaster terraMaster, String title) {
     this.terraMaster = terraMaster;
@@ -242,16 +202,16 @@ public class MapFrame extends JFrame {
 
       getContentPane().setLayout(new BorderLayout(0, 0));
 
-      panel = new JPanel();
+      JPanel panel = new JPanel();
 
-      panel.setBorder(new MatteBorder(2, 2, 2, 2, (Color) UIManager.getColor("Panel.background")));
+      panel.setBorder(new MatteBorder(2, 2, 2, 2, UIManager.getColor("Panel.background")));
       getContentPane().add(panel, BorderLayout.NORTH);
       GridBagLayout gbl_panel = new GridBagLayout();
-      gbl_panel.columnWidths = new int[] { 63, 0, 57, 0, 57, 57, 57, 57, 57, 57, 10, 30, 30, 0 };
-      gbl_panel.rowHeights = new int[] { 33, 19, 0 };
-      gbl_panel.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-          0.0 };
-      gbl_panel.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
+      gbl_panel.columnWidths = new int[]{63, 0, 57, 0, 57, 57, 57, 57, 57, 57, 10, 30, 30, 0};
+      gbl_panel.rowHeights = new int[]{33, 19, 0};
+      gbl_panel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+          0.0};
+      gbl_panel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
       panel.setLayout(gbl_panel);
 
       tileName = new JLabel();
@@ -279,7 +239,7 @@ public class MapFrame extends JFrame {
       butSync.setActionCommand(SYNC);
       butSync.setToolTipText("Synchronise selected tiles");
 
-      butSyncOld = new JButton(new ImageIcon(getClass().getClassLoader().getResource("Schedule.png")));
+      JButton butSyncOld = new JButton(new ImageIcon(getClass().getClassLoader().getResource("Schedule.png")));
       butSyncOld.setToolTipText("Synchronise all old tiles");
       butSyncOld.addActionListener(ad);
       butSyncOld.setActionCommand(SYNC_OLD);
@@ -289,7 +249,7 @@ public class MapFrame extends JFrame {
       gbc_butSyncOld.gridy = 0;
       panel.add(butSyncOld, gbc_butSyncOld);
 
-      addFlightplan = new JButton((Icon) new ImageIcon(getClass().getClassLoader().getResource("Liner.png")));
+      JButton addFlightplan = new JButton(new ImageIcon(getClass().getClassLoader().getResource("Liner.png")));
       addFlightplan.setToolTipText("Add a flightplan");
       addFlightplan.setActionCommand(FLIGHTPLAN);
       addFlightplan.addActionListener(ad);
@@ -311,7 +271,7 @@ public class MapFrame extends JFrame {
       butDelete.setActionCommand("DELETE");
       butDelete.setToolTipText("Delete selected tiles from disk");
 
-      butSearch = new JButton(new ImageIcon(MapFrame.class.getResource("/Eye.png")));
+      butSearch = new JButton(new ImageIcon(getClass().getClassLoader().getResource("Eye.png")));
       GridBagConstraints gbc_butSearch = new GridBagConstraints();
       gbc_butSearch.anchor = GridBagConstraints.NORTHWEST;
       gbc_butSearch.insets = new Insets(0, 0, 5, 5);
@@ -344,8 +304,8 @@ public class MapFrame extends JFrame {
       panel.add(butModels, gbc_butModels);
       butModels.setEnabled(true);
       butModels.addActionListener(ad);
-      butModels.setActionCommand("MODELS");
-      butModels.setToolTipText("Synchronise shared models");
+      butModels.setActionCommand(SHARED);
+      butModels.setToolTipText("Synchronise shared models and airports");
 
       butClear = new JButton(new ImageIcon(getClass().getClassLoader().getResource("New document.png")));
       GridBagConstraints gbc_butClear = new GridBagConstraints();
@@ -379,7 +339,7 @@ public class MapFrame extends JFrame {
       gbc_butPrefs.gridy = 0;
       panel.add(butPrefs, gbc_butPrefs);
       butPrefs.addActionListener(ad);
-      butPrefs.setActionCommand("PREFS");
+      butPrefs.setActionCommand(PREFS);
       butPrefs.setToolTipText("Properties");
 
       search = new JLabel("Search:");
@@ -391,7 +351,7 @@ public class MapFrame extends JFrame {
       panel.add(search, gbc_search);
       search.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10));
 
-      searchBar = new JComboBox();
+      searchBar = new JComboBox<>();
       searchBar.setEditable(true);
       GridBagConstraints gbc_searchBar = new GridBagConstraints();
       gbc_searchBar.fill = GridBagConstraints.HORIZONTAL;
@@ -405,12 +365,10 @@ public class MapFrame extends JFrame {
       searchBar.setToolTipText("Search for airport by name or code");
       terraMaster.getFgmap().addObserver(new SearchbarObserver());
 
-      butInfo = new JButton(new ImageIcon(getClass().getClassLoader().getResource("Question.png")));
-      butInfo.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          AboutDialog dialog = new AboutDialog();
-          dialog.setVisible(true);
-        }
+      JButton butInfo = new JButton(new ImageIcon(getClass().getClassLoader().getResource("Question.png")));
+      butInfo.addActionListener(e -> {
+        AboutDialog dialog = new AboutDialog();
+        dialog.setVisible(true);
       });
       butInfo.setToolTipText("About");
       butInfo.setActionCommand("PREFS");
@@ -450,7 +408,7 @@ public class MapFrame extends JFrame {
       });
       getContentPane().add(map, BorderLayout.CENTER);
 
-      bottomPanel = new JPanel();
+      JPanel bottomPanel = new JPanel();
       getContentPane().add(bottomPanel, BorderLayout.SOUTH);
       bottomPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
 
@@ -464,12 +422,6 @@ public class MapFrame extends JFrame {
     } catch (Throwable e) {
       log.log(Level.SEVERE, "Couldn't show MapFrame", e);
     }
-
-    /*
-     * // keyboard accels
-     * getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke
-     * .getKeyStroke(^S), "SYNC"); getActionMap().put("
-     */
   }
 
   public void restoreSettings() {
@@ -492,8 +444,7 @@ public class MapFrame extends JFrame {
     setLocation(x, y);
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Rectangle r = new Rectangle(screenSize);
-    if(!r.contains(getLocation()))
-    {
+    if (!r.contains(getLocation())) {
       setLocation(0, 0);
     }
 
@@ -502,9 +453,6 @@ public class MapFrame extends JFrame {
 
   /**
    * Set the projection center to the lat/lon in degrees
-   * 
-   * @param lat
-   * @param lon
    */
 
   public void setProjection(double lat, double lon) {
@@ -530,12 +478,10 @@ public class MapFrame extends JFrame {
 
   /**
    * called from Svn thread
-   * 
-   * @param n
    */
   public void progressUpdate(int n) {
     progressBar.setValue(progressBar.getValue() + n);
-    progressBar.setToolTipText("" + progressBar.getValue() + " / " + progressBar.getMaximum());
+    progressBar.setToolTipText(progressBar.getValue() + " / " + progressBar.getMaximum());
     repaint();
   }
 
@@ -552,8 +498,8 @@ public class MapFrame extends JFrame {
         try {
           terraMaster.getProps().store(new FileWriter("terramaster.properties"), null);
         } catch (Exception x) {
-          log.log(Level.WARNING, "Couldn\'t store settings {0}", x);
-          JOptionPane.showMessageDialog(null, "Couldn't store Properties " + x.toString(), "Error",
+          log.log(Level.WARNING, "Couldn't store settings {0}", x);
+          JOptionPane.showMessageDialog(null, "Couldn't store Properties " + x, "Error",
               JOptionPane.ERROR_MESSAGE);
         }
         log.info("Shut down Terramaster");
@@ -570,5 +516,4 @@ public class MapFrame extends JFrame {
       log.warning("Scenery folder empty.");
     }
   }
-
 }
