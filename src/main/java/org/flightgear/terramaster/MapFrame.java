@@ -97,10 +97,11 @@ public class MapFrame extends JFrame {
       switch (e.getActionCommand()) {
         case SYNC: {
           Collection<Syncable> set = new ArrayList<>();
-          map.getSelection().forEach(i -> {
-            i.setTypes(getSyncTypes());
-            set.add(i);
+          map.getSelection().forEach(tname -> {
+            tname.setTypes(getSyncTypes());
+            set.add(tname);
           });
+
           terraMaster.getTileService().sync(set, false);
           map.clearSelection();
           repaint();
@@ -108,18 +109,18 @@ public class MapFrame extends JFrame {
         }
         case SYNC_OLD: {
           Collection<Syncable> set = new ArrayList<>();
-          map.getSelection().forEach(i -> {
-            i.setTypes(getSyncTypes());
-            set.add(i);
+          map.getSelection().forEach(tname -> {
+            tname.setTypes(getSyncTypes());
+            set.add(tname);
           });
           if (set.isEmpty()) {
-            set.addAll(terraMaster.getMapScenery().keySet());
+            terraMaster.getMapScenery().keySet().forEach(tname -> {
+              tname.setTypes(getSyncTypes());
+              set.add(tname);
+            });
           }
 
           terraMaster.getTileService().sync(set, true);
-          progressBar.setMaximum(progressBar.getMaximum() + set.size() * 2);
-          progressBar.setVisible(true);
-          butStop.setEnabled(true);
           map.clearSelection();
           repaint();
           break;
