@@ -94,75 +94,87 @@ public class MapFrame extends JFrame {
     }
 
     public void actionPerformed(ActionEvent e) {
-      String a = e.getActionCommand();
-
-      if (a.equals(SYNC)) {
-        Collection<Syncable> set = new ArrayList<>();
-        map.getSelection().forEach(i -> {
-          i.setTypes(getSyncTypes());
-          set.add(i);
-        });
-        terraMaster.getTileService().sync(set, false);
-        map.clearSelection();
-        repaint();
-      } else if (a.equals(SYNC_OLD)) {
-
-        Collection<Syncable> set = new ArrayList<>();
-        map.getSelection().forEach(i -> {
-          i.setTypes(getSyncTypes());
-          set.add(i);
-        });
-        if (set.isEmpty()) {
-          set.addAll(terraMaster.getMapScenery().keySet());
-        }
-
-        terraMaster.getTileService().sync(set, true);
-        progressBar.setMaximum(progressBar.getMaximum() + set.size() * 2);
-        progressBar.setVisible(true);
-        butStop.setEnabled(true);
-        map.clearSelection();
-        repaint();
-      } else if (a.equals(FLIGHTPLAN)) {
-        FlightPlan fp = new FlightPlan(terraMaster);
-        fp.setVisible(true);
-        repaint();
-      } else if (a.equals(SHARED)) {
-        Collection<Syncable> set = new ArrayList<>();
-        set.add(new ModelsSync());
-        set.add(new AirportsSync());
-        terraMaster.getTileService().sync(set, false);
-        progressBar.setMaximum(progressBar.getMaximum() + set.size());
-        progressBar.setVisible(true);
-        butStop.setEnabled(true);
-      } else if (a.equals("DELETE")) {
-        terraMaster.getTileService().delete(map.getSelection());
-        map.clearSelection();
-        repaint();
-      } else if (a.equals("RESET")) {
-        map.toggleProj();
-        repaint();
-      } else if (a.equals("STOP")) {
-        terraMaster.getTileService().cancel();
-      } else if (a.equals("CLEAR")) {
-        terraMaster.getFgmap().clearAirports();
-        repaint();
-      } else if (a.equals(PREFS)) {
-        SettingsDialog settingsDialog = new SettingsDialog(terraMaster);
-        settingsDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-
-        settingsDialog.setVisible(true);
-        map.repaint();
-      } else if (a.equals("SEARCH")) {
-        Object selectedItem = searchBar.getSelectedItem();
-        if (selectedItem instanceof String) {
-          new WebWorker((String) selectedItem, terraMaster.getFgmap()).execute();
-        } else if (selectedItem instanceof Airport) {
-          setProjection(((Airport) selectedItem).lat, ((Airport) selectedItem).lon);
+      switch (e.getActionCommand()) {
+        case SYNC: {
+          Collection<Syncable> set = new ArrayList<>();
+          map.getSelection().forEach(i -> {
+            i.setTypes(getSyncTypes());
+            set.add(i);
+          });
+          terraMaster.getTileService().sync(set, false);
+          map.clearSelection();
           repaint();
+          break;
         }
-      } else if (a.equals("BROWSE")) {
-        Collection<TileName> sel = map.getSelection();
-        new WebWorker(sel, terraMaster.getFgmap()).execute();
+        case SYNC_OLD: {
+          Collection<Syncable> set = new ArrayList<>();
+          map.getSelection().forEach(i -> {
+            i.setTypes(getSyncTypes());
+            set.add(i);
+          });
+          if (set.isEmpty()) {
+            set.addAll(terraMaster.getMapScenery().keySet());
+          }
+
+          terraMaster.getTileService().sync(set, true);
+          progressBar.setMaximum(progressBar.getMaximum() + set.size() * 2);
+          progressBar.setVisible(true);
+          butStop.setEnabled(true);
+          map.clearSelection();
+          repaint();
+          break;
+        }
+        case FLIGHTPLAN:
+          FlightPlan fp = new FlightPlan(terraMaster);
+          fp.setVisible(true);
+          repaint();
+          break;
+        case SHARED: {
+          Collection<Syncable> set = new ArrayList<>();
+          set.add(new ModelsSync());
+          set.add(new AirportsSync());
+          terraMaster.getTileService().sync(set, false);
+          progressBar.setMaximum(progressBar.getMaximum() + set.size());
+          progressBar.setVisible(true);
+          butStop.setEnabled(true);
+          break;
+        }
+        case "DELETE":
+          terraMaster.getTileService().delete(map.getSelection());
+          map.clearSelection();
+          repaint();
+          break;
+        case "RESET":
+          map.toggleProj();
+          repaint();
+          break;
+        case "STOP":
+          terraMaster.getTileService().cancel();
+          break;
+        case "CLEAR":
+          terraMaster.getFgmap().clearAirports();
+          repaint();
+          break;
+        case PREFS:
+          SettingsDialog settingsDialog = new SettingsDialog(terraMaster);
+          settingsDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+          settingsDialog.setVisible(true);
+          map.repaint();
+          break;
+        case "SEARCH":
+          Object selectedItem = searchBar.getSelectedItem();
+          if (selectedItem instanceof String) {
+            new WebWorker((String) selectedItem, terraMaster.getFgmap()).execute();
+          } else if (selectedItem instanceof Airport) {
+            setProjection(((Airport) selectedItem).lat, ((Airport) selectedItem).lon);
+            repaint();
+          }
+          break;
+        case "BROWSE":
+          Collection<TileName> sel = map.getSelection();
+          new WebWorker(sel, terraMaster.getFgmap()).execute();
+          break;
       }
     }
 
