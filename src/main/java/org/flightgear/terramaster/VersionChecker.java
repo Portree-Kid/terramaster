@@ -108,12 +108,16 @@ public class VersionChecker extends SwingWorker<Version, Object>{
   @Override
   protected Version doInBackground() throws Exception {
     Version v = getMaxVersion();
-    boolean update = v.version.equals(loadVersion());
-    JOptionPane.showMessageDialog(null, "Version " + v.version + " available", "Version", JOptionPane.INFORMATION_MESSAGE, null);
+    Version localVersion = loadVersion();
+    boolean update = v.version.equals(localVersion);
+    log.log(Level.FINE, "Remote Version " + v + " Local Version " + localVersion);
+    if(!update) {
+      JOptionPane.showMessageDialog(null, "Version " + v.version + " available", "Version", JOptionPane.INFORMATION_MESSAGE, null);
+    }
     return null;
   }
   
-  private String loadVersion() {
+  private Version loadVersion() {
     try {
 
       Properties props = new Properties();
@@ -122,9 +126,12 @@ public class VersionChecker extends SwingWorker<Version, Object>{
           .getResourceAsStream("/META-INF/maven/org.flightgear/terramaster/pom.properties")) {
         props.load(is);
       }
+      String ret = props.getProperty("version").replaceAll("-SNAPSHOT", "");
+      log.log(Level.FINE, "Current local version " + ret);
       // build.minor.number=10
       // build.major.number=1
-      return props.getProperty("version").replaceAll("-SNAPSHOT", "");
+      terramaster.getProps().put("version", ret);
+      return new Version(ret);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

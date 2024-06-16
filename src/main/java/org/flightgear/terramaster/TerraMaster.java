@@ -69,9 +69,9 @@ public class TerraMaster {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {
       log.log(Level.INFO, "Failed to load system look and feel: ", e);
-    }
+    }  
 
-    frame = new MapFrame(this, "TerraMaster");
+    frame = new MapFrame(this, "TerraMaster " + getProps().getProperty("version"));
     frame.restoreSettings();
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setVisible(true);

@@ -56,7 +56,7 @@ public class SettingsDialog extends JDialog {
     this.terraMaster = terraMaster;
     setTitle("Settings");
     setModal(true);
-    setBounds(100, 100, 466, 327);
+    setBounds(100, 100, 466, 407);
     getContentPane().setLayout(new BorderLayout());
     JPanel contentPanel = new JPanel();
     contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
