@@ -50,11 +50,11 @@ public class AboutDialog extends JDialog {
    */
   private void initialize() {
     getContentPane().setFont(new Font("Tahoma", Font.PLAIN, 16));
-    setBounds(100, 100, 524, 404);
+    setBounds(100, 100, 524, 454);
     setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     GridBagLayout gridBagLayout = new GridBagLayout();
     gridBagLayout.columnWidths = new int[] { 149, 120 };
-    gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 37, 0 };
+    gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 37, 0 };
     gridBagLayout.columnWeights = new double[] { 1.0, 0.0 };
     gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
     getContentPane().setLayout(gridBagLayout);
@@ -91,7 +91,7 @@ public class AboutDialog extends JDialog {
     gbc_editorPane.gridx = 1;
     gbc_editorPane.gridy = 2;
     getContentPane().add(editorPane, gbc_editorPane);
-    editorPane.setToolTipText("Code");
+    editorPane.setToolTipText("Original Author");
     editorPane.setOpaque(false);
     editorPane.setForeground(new Color(0, 0, 153));
     editorPane.setEditable(false);
@@ -104,7 +104,7 @@ public class AboutDialog extends JDialog {
     gbc_editorPane_1.gridx = 2;
     gbc_editorPane_1.gridy = 2;
     getContentPane().add(editorPane_1, gbc_editorPane_1);
-    editorPane_1.setToolTipText("Code");
+    editorPane_1.setToolTipText("Current Maintainer");
     editorPane_1.setOpaque(false);
     editorPane_1.setEditable(false);
     editorPane_1.setBackground(Color.LIGHT_GRAY);
@@ -117,17 +117,30 @@ public class AboutDialog extends JDialog {
     gbc_dtrpnclive.gridx = 3;
     gbc_dtrpnclive.gridy = 2;
     getContentPane().add(dtrpnclive, gbc_dtrpnclive);
-    dtrpnclive.setToolTipText("Logo");
+    dtrpnclive.setToolTipText("Fixes");
     dtrpnclive.setOpaque(false);
     dtrpnclive.setEditable(false);
     dtrpnclive.setBackground(Color.LIGHT_GRAY);
     dtrpnclive.addHyperlinkListener(new HyperLinkListener());
 
+    JEditorPane dtrpnFl3dd0x = new JEditorPane(TEXT_HTML,
+        "<a href='https://github.com/The-Fl3dd0x'>The-Fl3dd0x</a>");
+    GridBagConstraints gbc_dtrpnFl3dd0x = new GridBagConstraints();
+    gbc_dtrpnFl3dd0x.insets = new Insets(0, 10, 5, 10);
+    gbc_dtrpnFl3dd0x.gridx = 1;
+    gbc_dtrpnFl3dd0x.gridy = 3;
+    getContentPane().add(dtrpnFl3dd0x, gbc_dtrpnFl3dd0x);
+    dtrpnFl3dd0x.setToolTipText("Fixes");
+    dtrpnFl3dd0x.setOpaque(false);
+    dtrpnFl3dd0x.setEditable(false);
+    dtrpnFl3dd0x.setBackground(Color.LIGHT_GRAY);
+    dtrpnFl3dd0x.addHyperlinkListener(new HyperLinkListener());
+
     JLabel lblLicense = new JLabel("License : ");
     GridBagConstraints gbc_lblLicense = new GridBagConstraints();
     gbc_lblLicense.insets = new Insets(0, 0, 5, 5);
     gbc_lblLicense.gridx = 0;
-    gbc_lblLicense.gridy = 3;
+    gbc_lblLicense.gridy = 4;
     getContentPane().add(lblLicense, gbc_lblLicense);
 
     JEditorPane btnGpl = new JEditorPane(TEXT_HTML,
@@ -135,7 +148,7 @@ public class AboutDialog extends JDialog {
     GridBagConstraints gbc_btnGpl = new GridBagConstraints();
     gbc_btnGpl.insets = new Insets(0, 0, 5, 5);
     gbc_btnGpl.gridx = 1;
-    gbc_btnGpl.gridy = 3;
+    gbc_btnGpl.gridy = 4;
     getContentPane().add(btnGpl, gbc_btnGpl);
     btnGpl.setFont(new Font("Arial", Font.PLAIN, 13));
     btnGpl.setBackground(Color.LIGHT_GRAY);
@@ -148,7 +161,7 @@ public class AboutDialog extends JDialog {
     GridBagConstraints gbc_btnSource = new GridBagConstraints();
     gbc_btnSource.insets = new Insets(0, 0, 5, 5);
     gbc_btnSource.gridx = 2;
-    gbc_btnSource.gridy = 3;
+    gbc_btnSource.gridy = 4;
     getContentPane().add(btnSource, gbc_btnSource);
     btnSource.setFont(new Font("Arial", Font.PLAIN, 13));
     btnSource.setBackground(Color.LIGHT_GRAY);
@@ -170,19 +183,19 @@ public class AboutDialog extends JDialog {
     GridBagConstraints gbc_lblVersion = new GridBagConstraints();
     gbc_lblVersion.insets = new Insets(0, 0, 5, 5);
     gbc_lblVersion.gridx = 0;
-    gbc_lblVersion.gridy = 4;
+    gbc_lblVersion.gridy = 5;
     getContentPane().add(lblVersion, gbc_lblVersion);
 
     lblV = new JLabel("V");
     GridBagConstraints gbc_lblV = new GridBagConstraints();
     gbc_lblV.insets = new Insets(0, 0, 5, 5);
     gbc_lblV.gridx = 1;
-    gbc_lblV.gridy = 4;
+    gbc_lblV.gridy = 5;
     getContentPane().add(lblV, gbc_lblV);
     GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
     gbc_btnNewButton.gridwidth = 4;
     gbc_btnNewButton.gridx = 0;
-    gbc_btnNewButton.gridy = 5;
+    gbc_btnNewButton.gridy = 6;
     getContentPane().add(btnNewButton, gbc_btnNewButton);
     loadVersion();
   }

@@ -482,7 +482,9 @@ public class FlightgearNAPTRQuery {
       declaredMethod.invoke(null);
     } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
         | InvocationTargetException e) {
-      log.log(Level.WARNING, e.toString(), e);
+          if (System.getProperty("os.name").indexOf("Windows")>=0) {
+            log.log(Level.WARNING, e.toString(), e);            
+          }
     }
   }
 
