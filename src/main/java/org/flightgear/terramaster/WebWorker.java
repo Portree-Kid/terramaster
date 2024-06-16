@@ -149,7 +149,7 @@ public class WebWorker extends SwingWorker<List<Airport>, Void> {
   private List<Airport> search(String str) {
     try {
       str = URLEncoder.encode(str.trim(), "UTF-8");
-      String url = String.format("http://mpmap02.flightgear.org/fg_nav_xml.cgi?sstr=%s&apt_code&apt_name", str);
+      String url = String.format("https://mpmap02.flightgear.org/fg_nav_xml.cgi?sstr=%s&apt_code&apt_name", str);
       return webquery(new URL(url));
     } catch (MalformedURLException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -174,7 +174,7 @@ public class WebWorker extends SwingWorker<List<Airport>, Void> {
       int lon = t.getLon();
       String sw = String.format("%d,%d", lat, lon);
       String ne = String.format("%d,%d", lat + 1, lon + 1);
-      String url = String.format("http://mpmap02.flightgear.org/fg_nav_xml.cgi?ne=%s&sw=%s&apt_code", ne, sw);
+      String url = String.format("https://mpmap02.flightgear.org/fg_nav_xml.cgi?ne=%s&sw=%s&apt_code", ne, sw);
       try {
         currentResult.addAll(webquery(new URL(url)));
         SwingUtilities.invokeLater(() -> callback.getMapFrame().repaint());

@@ -4,52 +4,37 @@ import java.awt.Polygon;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The data associated with a tile.
+ * The data associated with a tile
  * 
  * @author keith.paterson
- *
+ * @author Simon
  */
 
 public class TileData {
-  private Logger log = Logger.getLogger(TerraMaster.LOGGER_CATEGORY);
+  private final Logger log = Logger.getLogger(TerraMaster.LOGGER_CATEGORY);
   /** The square drawn on the map. */
   public Polygon poly;
   /** Flags indicating what the tiles contain. Used for the mouse over. */
-  private boolean terrain = false;
-  private boolean objects = false;
-  private boolean buildings = false;
-  private boolean roads = false;
+  private final HashSet<TerraSyncDirectoryType> directoryTypes;
 
-  private boolean pylons = false;
-  private File dirTerrain = null;
-  private File dirObjects = null;
-  private File dirBuildings = null;
-  private File dirRoads = null;
-  private File dirPylons = null;
+  /** Map with the File objects for the directory types. */
+  private final HashMap<TerraSyncDirectoryType, File> dirs;
 
   public TileData() {
+    directoryTypes = new HashSet<>();
+    dirs = new HashMap<>();
   }
 
   public void delete() {
-    if (terrain) {
-      deltree(dirTerrain);
-    }
-
-    if (objects) {
-      deltree(dirObjects);
-    }
-    if (buildings) {
-      deltree(dirBuildings);
-    }
-    if (pylons) {
-      deltree(dirPylons);
-    }
-    if (roads) {
-      deltree(dirRoads);
+    for (TerraSyncDirectoryType type : TerraSyncDirectoryType.values()) {
+      if (hasDirectory(type)) {
+        deltree(getDir(type));
+      }
     }
   }
 
@@ -70,56 +55,40 @@ public class TileData {
     } catch (SecurityException | IOException x) {
       log.log(Level.WARNING, "Deltree", x);
     }
+
+    // Delete compressed tar file
+    File tarFile = new File(dir.getParent() + File.separator + dir.getName() + ".txz");
+    if (tarFile.exists()) {
+      try {
+        Files.delete(tarFile.toPath());
+      } catch (SecurityException | IOException x) {
+        log.log(Level.WARNING, "Deltree", x);
+      }
+    }
   }
 
-  public synchronized boolean isBuildings() {
-    return buildings;
+  public synchronized boolean hasDirectory(TerraSyncDirectoryType type) {
+    return directoryTypes.contains(type);
   }
 
-  public synchronized boolean isObjects() {
-    return objects;
+  public synchronized boolean hasAllDirs() {
+    boolean hasAll = true;
+    for (TerraSyncDirectoryType type : TerraSyncDirectoryType.values()) {
+      if (type.isTile() && !hasDirectory(type)) {
+        hasAll = false;
+      }
+    }
+    return hasAll;
   }
 
-  public synchronized boolean isRoads() {
-    return roads;
+  public void setDirTypePath(TerraSyncDirectoryType type, File file) {
+    if (file != null && file.exists()) {
+      directoryTypes.add(type);
+      dirs.put(type, file);
+    }
   }
 
-  public synchronized boolean isTerrain() {
-    return terrain;
+  public File getDir(TerraSyncDirectoryType type) {
+    return dirs.get(type);
   }
-
-  public synchronized boolean isPylons() {
-    return pylons;
-  }
-
-  public synchronized void setDirRoads(File i) {
-    roads = i!= null && i.exists();
-    this.dirRoads = i;
-  }
-
-  public synchronized void setDirPylons(File i) {
-    pylons = i!= null && i.exists();
-    this.dirPylons = i;
-  }
-
-  public void setDirTerrain(File i) {
-    terrain = i!= null && i.exists();
-    dirTerrain = i;
-  }
-
-  public void setDirObjects(File i) {
-    objects = i!= null && i.exists();
-    dirObjects = i;
-  }
-
-  public void setDirBuildings(File i) {
-    buildings = i!= null && i.exists();
-    dirBuildings = i;
-  }
-
-  public File getDirTerrain() {
-    return dirTerrain;
-  }
-
-
 }

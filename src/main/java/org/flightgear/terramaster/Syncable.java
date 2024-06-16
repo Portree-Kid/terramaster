@@ -6,6 +6,6 @@ public interface Syncable {
 
   String getName();
 
-  TerraSyncDirectoryTypes[] getTypes();
+  TerraSyncDirectoryType[] getTypes();
 
 }

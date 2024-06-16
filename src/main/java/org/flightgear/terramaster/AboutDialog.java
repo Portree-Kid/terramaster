@@ -1,12 +1,6 @@
 package org.flightgear.terramaster;
 
-import java.awt.Color;
-import java.awt.Desktop;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -22,8 +16,6 @@ import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.UIManager;
-import java.awt.SystemColor;
 
 public class AboutDialog extends JDialog {
   private static final String TEXT_HTML = "text/html";
@@ -49,6 +41,7 @@ public class AboutDialog extends JDialog {
   public AboutDialog() {
     setIconImage(Toolkit.getDefaultToolkit().getImage(AboutDialog.class.getResource("/TerraMaster logo cropped.ico")));
     setAlwaysOnTop(true);
+    setResizable(false);
     initialize();
   }
 
@@ -171,7 +164,7 @@ public class AboutDialog extends JDialog {
     gbc_lblNewLabel.gridx = 0;
     gbc_lblNewLabel.gridy = 0;
     getContentPane().add(lblNewLabel, gbc_lblNewLabel);
-    lblNewLabel.setIcon(new ImageIcon("C:\\workspaces\\hochtief\\terramaster2\\resources\\TerraMaster logo 2.png"));
+    lblNewLabel.setIcon(new ImageIcon(AboutDialog.class.getResource("/TerraMaster logo 2.png")));
 
     JLabel lblVersion = new JLabel("Version : ");
     GridBagConstraints gbc_lblVersion = new GridBagConstraints();

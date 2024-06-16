@@ -13,8 +13,8 @@ public class ModelsSync implements Syncable {
   }
 
   @Override
-  public TerraSyncDirectoryTypes[] getTypes() {
-    return new TerraSyncDirectoryTypes[]{TerraSyncDirectoryTypes.MODELS};
+  public TerraSyncDirectoryType[] getTypes() {
+    return new TerraSyncDirectoryType[]{TerraSyncDirectoryType.MODELS};
   }
 
 }

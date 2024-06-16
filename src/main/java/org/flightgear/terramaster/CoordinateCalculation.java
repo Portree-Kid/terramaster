@@ -16,7 +16,6 @@ public class CoordinateCalculation {
 	 * @param lon1 in radians
 	 * @param lat2 in radians
 	 * @param lon2 in radians
-	 * @return
 	 */
 	static double oldHaversine(double lat1, double lon1, double lat2, double lon2) {
 		double dlat = Math.sin((lat2 - lat1) / 2);
@@ -38,11 +37,6 @@ public class CoordinateCalculation {
 	
 	/**
 	 * Calculate the bearing
-	 * @param lat1 
-	 * @param lon1
-	 * @param lat2
-	 * @param lon2
-	 * @return
 	 */
 
 	public static double greatCircleBearing(double lat1, double lon1, double lat2, double lon2) {

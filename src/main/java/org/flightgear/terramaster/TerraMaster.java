@@ -16,13 +16,18 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import org.flightgear.terramaster.dns.FlightgearNAPTRQuery;
 import org.flightgear.terramaster.dns.FlightgearNAPTRQuery.HealthStats;
 import org.flightgear.terramaster.dns.WeightedUrl;
+
+/**
+ * Main class
+ *
+ * @author keith.paterson
+ * @author Simon
+ */
 
 public class TerraMaster {
   public static final String LOGGER_CATEGORY = "org.flightgear";
@@ -37,7 +42,7 @@ public class TerraMaster {
 
   private FGMap fgmap;
   private Properties props = new Properties();
-  private Logger staticLogger = Logger.getLogger(TerraMaster.class.getCanonicalName());
+  private final Logger staticLogger = Logger.getLogger(TerraMaster.class.getCanonicalName());
 
   public TerraMaster() {
     setFgmap(new FGMap(this)); // handles webqueries
@@ -48,7 +53,7 @@ public class TerraMaster {
     java.net.URL url = getClass().getClassLoader().getResource("maps/gshhs_l.b");
     log.log(Level.FINE, "getResource: {0}", url);
     if (url == null) {
-      JOptionPane.showMessageDialog(null, "Couldn\'t load resources", "ERROR", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(null, "Couldn't load resources", "ERROR", JOptionPane.ERROR_MESSAGE);
       return;
     }
 
@@ -57,7 +62,13 @@ public class TerraMaster {
       tileService.setScnPath(new File(path));
       setMapScenery(tileService.newScnMap(path));
     } else {
-      setMapScenery(new HashMap<TileName, TileData>());
+      setMapScenery(new HashMap<>());
+    }
+
+    try {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {
+      log.log(Level.INFO, "Failed to load system look and feel: ", e);
     }
 
     frame = new MapFrame(this, "TerraMaster");
@@ -70,52 +81,33 @@ public class TerraMaster {
 
   public static void main(String[] args) {
 
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          InputStream resourceAsStream = TerraMaster.class.getClassLoader()
-              .getResourceAsStream("terramaster.logging.properties");
-          if (resourceAsStream != null) {
-            LogManager.getLogManager().readConfiguration(resourceAsStream);
-            Logger.getLogger("java.awt").setLevel(Level.OFF);
-            Logger.getLogger("sun.awt").setLevel(Level.OFF);
-            Logger.getLogger("javax.swing").setLevel(Level.OFF);
-            Logger.getGlobal().info("Successfully configured logging");
-          }
-        } catch (SecurityException | IOException e1) {
-          e1.printStackTrace();
+    SwingUtilities.invokeLater(() -> {
+      try {
+        InputStream resourceAsStream = TerraMaster.class.getClassLoader()
+            .getResourceAsStream("terramaster.logging.properties");
+        if (resourceAsStream != null) {
+          LogManager.getLogManager().readConfiguration(resourceAsStream);
+          Logger.getGlobal().info("Successfully configured logging");
         }
-        TerraMaster tm = new TerraMaster();
-        tm.loadVersion();
-        tm.readMetaINF();
-        tm.startUp();
-        tm.setTileService();
-        tm.initLoggers();
-
-        tm.createAndShowGUI();
+      } catch (SecurityException | IOException e1) {
+        Logger.getGlobal().log(Level.WARNING, "Error loading Logger settings: ", e1);
       }
+      TerraMaster tm = new TerraMaster();
+      tm.loadVersion();
+      tm.readMetaINF();
+      tm.startUp();
+      tm.setTileService();
+      tm.initLoggers();
+
+      tm.createAndShowGUI();
     });
 
   }
 
   protected void initLoggers() {
     if (getProps().getProperty(TerraMasterProperties.LOG_LEVEL) != null) {
-
       Level newLevel = Level.parse(getProps().getProperty(TerraMasterProperties.LOG_LEVEL));
       staticLogger.getParent().setLevel(newLevel);
-      LogManager manager = LogManager.getLogManager();
-      Enumeration<String> loggers = manager.getLoggerNames();
-      while (loggers.hasMoreElements()) {
-        String logger = loggers.nextElement();
-        Logger logger2 = manager.getLogger(logger);
-        if (logger2 != null && logger2.getLevel() != null) {
-          if (logger.contains("awt"))
-            logger2.setLevel(Level.FINEST);
-          else
-            logger2.setLevel(newLevel);
-        }
-      }
-
     }
   }
 
@@ -133,7 +125,7 @@ public class TerraMaster {
         Logger.getGlobal().getParent().setLevel(Level.INFO);
       }
     } catch (IOException e) {
-      staticLogger.log(Level.WARNING, "Couldn't load properties : " + e.toString(), e);
+      staticLogger.log(Level.WARNING, "Couldn't load properties : " + e, e);
     }
     staticLogger.info("Starting TerraMaster " + getProps().getProperty("version"));
   }
@@ -197,7 +189,7 @@ public class TerraMaster {
         .getResourceAsStream("/META-INF/maven/org.flightgear/terramaster/pom.properties")) {
       getProps().load(is);
     } catch (IOException e) {
-      staticLogger.log(Level.WARNING, "Couldn't load properties : " + e.toString(), e);
+      staticLogger.log(Level.WARNING, "Couldn't load properties : " + e, e);
     } catch (Exception e) {
       staticLogger.log(Level.WARNING, e.toString(), e);
     }
@@ -215,7 +207,7 @@ public class TerraMaster {
     int errors = 0;
     for (Entry<String, HealthStats> entry : flightgearNAPTRQuery.getStats().entrySet()) {
       HealthStats stats = entry.getValue();
-      log.fine(() -> stats.toString());
+      log.fine(stats::toString);
       errors += stats.errors;
     }
     if (errors > 0) {
@@ -225,10 +217,6 @@ public class TerraMaster {
     }
   }
 
-  /**
-   * @param completeStats
-   * 
-   */
   public void showStats(Map<WeightedUrl, TileResult> completeStats) {
     try {
 
@@ -237,5 +225,4 @@ public class TerraMaster {
       log.log(Level.SEVERE, "Error showing stats ", e);
     }
   }
-
 }

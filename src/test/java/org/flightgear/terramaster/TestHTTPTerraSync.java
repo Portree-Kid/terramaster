@@ -7,10 +7,8 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import java.awt.AWTException;
-import java.awt.Robot;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -91,8 +89,8 @@ public class TestHTTPTerraSync {
     Collection<Syncable> m = new ArrayList<>();
     Collection<TileName> tl = new ArrayList<>();
     TileName t = new TileName("w006n56");
-    t.setTypes(new TerraSyncDirectoryTypes[] { TerraSyncDirectoryTypes.BUILDINGS, TerraSyncDirectoryTypes.OBJECTS,
-        TerraSyncDirectoryTypes.ROADS, TerraSyncDirectoryTypes.TERRAIN, TerraSyncDirectoryTypes.PYLONS });
+    t.setTypes(new TerraSyncDirectoryType[] { TerraSyncDirectoryType.BUILDINGS, TerraSyncDirectoryType.OBJECTS,
+        TerraSyncDirectoryType.ROADS, TerraSyncDirectoryType.TERRAIN, TerraSyncDirectoryType.PYLONS });
     tl.add(t);
     ts.delete(tl);
     m.add(t);

@@ -56,10 +56,10 @@ public class TestAboutDialog {
     HTTPTerraSync ts = new HTTPTerraSync(tm);
     ts.start();
     ts.setScnPath(scnDir);
-    
+
     doReturn(ts).when(tm).getTileService();
-    
-    
+
+
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {
@@ -78,7 +78,7 @@ public class TestAboutDialog {
   @Test
   public void test() throws InterruptedException {
     AboutDialog sd = new AboutDialog();
-    sd.setBounds(0, 0, sd.getWidth(), sd.getHeight());
+    sd.setLocation(0, 0);
     (new Thread() {
       @Override
       public void run() {
@@ -86,10 +86,7 @@ public class TestAboutDialog {
       }
     }).start();
     r.setAutoDelay(300);
-    mouseMove(130, 174);
-    r.mousePress(InputEvent.BUTTON1_MASK);
-    r.mouseRelease(InputEvent.BUTTON1_MASK);
-    mouseMove(260, 328);
+    mouseMove(260, 375);
     r.mousePress(InputEvent.BUTTON1_MASK);
     r.mouseRelease(InputEvent.BUTTON1_MASK);
     Thread.sleep(1000);
@@ -101,5 +98,4 @@ public class TestAboutDialog {
       r.mouseMove(x, y);
     }
   }
-
 }

@@ -88,7 +88,7 @@ public class TestSettingsDialog {
     mouseMove(350, 295);
     r.mousePress(InputEvent.BUTTON1_MASK);
     r.mouseRelease(InputEvent.BUTTON1_MASK);
-    assertEquals("Objects must be set to true in the settings.", Boolean.TRUE.toString(), props.getProperty(TerraSyncDirectoryTypes.OBJECTS.name()));    
+    assertEquals("Roads must be set to true in the settings.", Boolean.TRUE.toString(), props.getProperty(TerraSyncDirectoryType.ROADS.name()));
   }
 
   private void mouseMove(int x, int y) {
@@ -97,5 +97,4 @@ public class TestSettingsDialog {
       r.mouseMove(x, y);
     }
   }
-
 }

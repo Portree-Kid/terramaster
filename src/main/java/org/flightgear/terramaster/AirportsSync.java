@@ -4,15 +4,23 @@ import java.io.File;
 
 public class AirportsSync implements Syncable {
 
-  private String icaoPart;
+  private final String icaoPart;
 
   public AirportsSync(String icaoPart) {
     this.icaoPart = icaoPart;
   }
 
+  public AirportsSync() {
+    icaoPart = "";
+  }
+
   @Override
   public String buildPath() {
-    return icaoPart.charAt(0) + File.separator + icaoPart.charAt(1);
+    if (!icaoPart.isEmpty()) {
+      return icaoPart.charAt(0) + File.separator + icaoPart.charAt(1);
+    } else {
+      return "";
+    }
   }
 
   @Override
@@ -21,8 +29,8 @@ public class AirportsSync implements Syncable {
   }
 
   @Override
-  public TerraSyncDirectoryTypes[] getTypes() {
-    return new TerraSyncDirectoryTypes[]{TerraSyncDirectoryTypes.AIRPORTS};
+  public TerraSyncDirectoryType[] getTypes() {
+    return new TerraSyncDirectoryType[]{TerraSyncDirectoryType.AIRPORTS};
   }
 
 }
