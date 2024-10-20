@@ -107,10 +107,11 @@ public class VersionChecker extends SwingWorker<Version, Object>{
 
   @Override
   protected Version doInBackground() throws Exception {
+
     Version v = getMaxVersion();
     Version localVersion = loadVersion();
-    boolean update = v.version.equals(localVersion);
-    log.log(Level.FINE, "Remote Version " + v + " Local Version " + localVersion);
+    boolean update = v.compareTo(localVersion)<0;
+    log.log(Level.INFO, "Remote Version " + v + " Local Version " + localVersion);
     if(!update) {
       JOptionPane.showMessageDialog(null, "Version " + v.version + " available", "Version", JOptionPane.INFORMATION_MESSAGE, null);
     }
@@ -127,7 +128,7 @@ public class VersionChecker extends SwingWorker<Version, Object>{
         props.load(is);
       }
       String ret = props.getProperty("version").replaceAll("-SNAPSHOT", "");
-      log.log(Level.FINE, "Current local version " + ret);
+      log.log(Level.INFO, "Current local version " + ret);
       // build.minor.number=10
       // build.major.number=1
       terramaster.getProps().put("version", ret);
