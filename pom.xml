@@ -72,6 +72,8 @@
                 <version>2.10.4</version>
                 <configuration>
                     <additionalparam>-Xdoclint:none</additionalparam>
+                    <excludePackageNames>org.flightgear.terramaster.dns</excludePackageNames>
+                    <failOnError>false</failOnError>
                 </configuration>
             </plugin>
             <plugin>
