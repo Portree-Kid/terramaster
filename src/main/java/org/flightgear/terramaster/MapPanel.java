@@ -715,7 +715,7 @@ public class MapPanel extends JPanel {
         TileData t = terraMaster.getMapScenery().get(n);
         t.poly = poly;
         if (poly != null) {
-          if (t.hasAllDirs())
+          if (t.hasAllDirTypes(terraMaster.getSyncTypes()))
             g.setColor(Color.green);
           else
             g.setColor(Color.yellow);

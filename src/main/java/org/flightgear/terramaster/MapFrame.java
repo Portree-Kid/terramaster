@@ -98,7 +98,7 @@ public class MapFrame extends JFrame {
         case SYNC: {
           Collection<Syncable> set = new ArrayList<>();
           map.getSelection().forEach(tname -> {
-            tname.setTypes(getSyncTypes());
+            tname.setTypes(terraMaster.getSyncTypes());
             set.add(tname);
           });
 
@@ -110,12 +110,12 @@ public class MapFrame extends JFrame {
         case SYNC_OLD: {
           Collection<Syncable> set = new ArrayList<>();
           map.getSelection().forEach(tname -> {
-            tname.setTypes(getSyncTypes());
+            tname.setTypes(terraMaster.getSyncTypes());
             set.add(tname);
           });
           if (set.isEmpty()) {
             terraMaster.getMapScenery().keySet().forEach(tname -> {
-              tname.setTypes(getSyncTypes());
+              tname.setTypes(terraMaster.getSyncTypes());
               set.add(tname);
             });
           }
@@ -177,20 +177,6 @@ public class MapFrame extends JFrame {
           new WebWorker(sel, terraMaster.getFgmap()).execute();
           break;
       }
-    }
-
-    private TerraSyncDirectoryType[] getSyncTypes() {
-      ArrayList<TerraSyncDirectoryType> types = new ArrayList<>();
-
-      TerraSyncDirectoryType[] enumConstants = TerraSyncDirectoryType.class.getEnumConstants();
-      for (TerraSyncDirectoryType terraSyncDirectoryType : enumConstants) {
-        if (terraSyncDirectoryType.isTile()) {
-          if (Boolean.parseBoolean(terraMaster.getProps().getProperty(terraSyncDirectoryType.name(), "false"))) {
-            types.add(terraSyncDirectoryType);
-          }
-        }
-      }
-      return types.toArray(new TerraSyncDirectoryType[0]);
     }
   }
 

@@ -6,11 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -224,5 +221,19 @@ public class TerraMaster {
     } catch (Exception e) {
       log.log(Level.SEVERE, "Error showing stats ", e);
     }
+  }
+
+  public TerraSyncDirectoryType[] getSyncTypes() {
+    ArrayList<TerraSyncDirectoryType> types = new ArrayList<>();
+
+    TerraSyncDirectoryType[] enumConstants = TerraSyncDirectoryType.class.getEnumConstants();
+    for (TerraSyncDirectoryType terraSyncDirectoryType : enumConstants) {
+      if (terraSyncDirectoryType.isTile()) {
+        if (Boolean.parseBoolean(getProps().getProperty(terraSyncDirectoryType.name(), "false"))) {
+          types.add(terraSyncDirectoryType);
+        }
+      }
+    }
+    return types.toArray(new TerraSyncDirectoryType[0]);
   }
 }

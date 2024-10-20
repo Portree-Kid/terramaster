@@ -71,9 +71,9 @@ public class TileData {
     return directoryTypes.contains(type);
   }
 
-  public synchronized boolean hasAllDirs() {
+  public synchronized boolean hasAllDirTypes(TerraSyncDirectoryType[] dirTypes) {
     boolean hasAll = true;
-    for (TerraSyncDirectoryType type : TerraSyncDirectoryType.values()) {
+    for (TerraSyncDirectoryType type : dirTypes) {
       if (type.isTile() && !hasDirectory(type)) {
         hasAll = false;
       }
