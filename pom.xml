@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.flightgear</groupId>
     <artifactId>terramaster</artifactId>
-    <version>2.07-SNAPSHOT</version>
+    <version>2.07</version>
     <repositories>
         <repository>
             <id>central</id>
@@ -14,7 +14,7 @@
         <url>https://github.com/Portree-Kid/terramaster.git</url>
         <connection>scm:git:git://github.com/Portree-Kid/terramaster.git</connection>
         <developerConnection>scm:git:git@github.com:Portree-Kid/terramaster.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>terramaster-2.07</tag>
     </scm>
     <distributionManagement>
         <repository>
