@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -74,6 +75,10 @@ public class MapFrame extends JFrame {
   private static final String FLIGHTPLAN = "FLIGHTPLAN";
   private static final String SYNC_OLD = "SYNC_OLD";
   private static final String SYNC = "SYNC";
+  private static final String RESET = "RESET";
+  private static final String DELETE = "DELETE";
+  private static final String CLEAR = "CLEAR";
+  private static final String STOP = "STOP";
 
   /**
    * This Adapter is used by the child elements to receive Events
@@ -93,12 +98,15 @@ public class MapFrame extends JFrame {
       storeSettings();
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       switch (e.getActionCommand()) {
         case SYNC: {
           Collection<Syncable> set = new ArrayList<>();
           map.getSelection().forEach(tname -> {
-            tname.setTypes(terraMaster.getSyncTypes());
+            for (TerraSyncRootDirectoryType rootType : TerraSyncRootDirectoryType.values()) {
+              tname.setTypes(rootType, terraMaster.getSyncTypes(rootType));
+            }
             set.add(tname);
           });
 
@@ -110,12 +118,16 @@ public class MapFrame extends JFrame {
         case SYNC_OLD: {
           Collection<Syncable> set = new ArrayList<>();
           map.getSelection().forEach(tname -> {
-            tname.setTypes(terraMaster.getSyncTypes());
+            for (TerraSyncRootDirectoryType rootType : TerraSyncRootDirectoryType.values()) {
+              tname.setTypes(rootType, terraMaster.getSyncTypes(rootType));
+            }
             set.add(tname);
           });
           if (set.isEmpty()) {
             terraMaster.getMapScenery().keySet().forEach(tname -> {
-              tname.setTypes(terraMaster.getSyncTypes());
+              for (TerraSyncRootDirectoryType rootType : TerraSyncRootDirectoryType.values()) {
+                tname.setTypes(rootType, terraMaster.getSyncTypes(rootType));
+              }
               set.add(tname);
             });
           }
@@ -132,27 +144,35 @@ public class MapFrame extends JFrame {
           break;
         case SHARED: {
           Collection<Syncable> set = new ArrayList<>();
-          set.add(new ModelsSync());
-          set.add(new AirportsSync());
+          final Properties props = terraMaster.getProps();
+          if (Boolean.parseBoolean(props.getProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED))) {
+            set.add(new ModelsSync(props.getProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH)));
+            set.add(new AirportsSync(props.getProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH)));
+          }
+          if (Boolean.parseBoolean(terraMaster.getProps().getProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.ENABLED))) {
+            set.add(new ModelsSync(props.getProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.SCENERY_PATH)));
+            set.add(new AirportsSync(props.getProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.SCENERY_PATH)));
+          }
           terraMaster.getTileService().sync(set, false);
           progressBar.setMaximum(progressBar.getMaximum() + set.size());
           progressBar.setVisible(true);
           butStop.setEnabled(true);
           break;
         }
-        case "DELETE":
+
+        case DELETE:
           terraMaster.getTileService().delete(map.getSelection());
           map.clearSelection();
           repaint();
           break;
-        case "RESET":
+        case RESET:
           map.toggleProj();
           repaint();
           break;
-        case "STOP":
+        case STOP:
           terraMaster.getTileService().cancel();
           break;
-        case "CLEAR":
+        case CLEAR:
           terraMaster.getFgmap().clearAirports();
           repaint();
           break;
@@ -186,13 +206,13 @@ public class MapFrame extends JFrame {
   JLabel search;
   JButton butSync, butDelete, butStop, butModels, butReset, butClear, butPrefs, butSearch;
   JProgressBar progressBar;
-  static Logger log = Logger.getLogger(TerraMaster.LOGGER_CATEGORY);
+  static final Logger LOG = Logger.getLogger(TerraMaster.LOGGER_CATEGORY);
   JTextField tileindex;
   private final transient TerraMaster terraMaster;
 
   public MapFrame(TerraMaster terraMaster, String title) {
     this.terraMaster = terraMaster;
-    setIconImage(Toolkit.getDefaultToolkit().getImage("TerraMaster logo cropped.ico"));
+    setIconImage(Toolkit.getDefaultToolkit().getImage("about_icon.png"));
     try {
       MFAdapter ad = new MFAdapter();
 
@@ -267,7 +287,7 @@ public class MapFrame extends JFrame {
       panel.add(butDelete, gbc_butDelete);
       butDelete.setEnabled(false);
       butDelete.addActionListener(ad);
-      butDelete.setActionCommand("DELETE");
+      butDelete.setActionCommand(DELETE);
       butDelete.setToolTipText("Delete selected tiles from disk");
 
       butSearch = new JButton(new ImageIcon(getClass().getClassLoader().getResource("Eye.png")));
@@ -291,7 +311,7 @@ public class MapFrame extends JFrame {
       panel.add(butStop, gbc_butStop);
       butStop.setEnabled(false);
       butStop.addActionListener(ad);
-      butStop.setActionCommand("STOP");
+      butStop.setActionCommand(STOP);
       butStop.setToolTipText("Stop all queued syncs");
 
       butModels = new JButton(new ImageIcon(getClass().getClassLoader().getResource("Company.png")));
@@ -314,7 +334,7 @@ public class MapFrame extends JFrame {
       gbc_butClear.gridy = 0;
       panel.add(butClear, gbc_butClear);
       butClear.addActionListener(ad);
-      butClear.setActionCommand("CLEAR");
+      butClear.setActionCommand(CLEAR);
       butClear.setToolTipText("Clear all airports from map");
 
       butReset = new JButton(new ImageIcon(getClass().getClassLoader().getResource("globe.png")));
@@ -327,7 +347,7 @@ public class MapFrame extends JFrame {
       gbc_butReset.gridy = 0;
       panel.add(butReset, gbc_butReset);
       butReset.addActionListener(ad);
-      butReset.setActionCommand("RESET");
+      butReset.setActionCommand(RESET);
       butReset.setToolTipText("Toggle between projections");
 
       butPrefs = new JButton(new ImageIcon(getClass().getClassLoader().getResource("application.png")));
@@ -419,7 +439,7 @@ public class MapFrame extends JFrame {
 
       map.passFrame(this);
     } catch (Throwable e) {
-      log.log(Level.SEVERE, "Couldn't show MapFrame", e);
+      LOG.log(Level.SEVERE, "Couldn't show MapFrame", e);
     }
   }
 
@@ -476,7 +496,7 @@ public class MapFrame extends JFrame {
   }
 
   /**
-   * called from Svn thread
+   * called from Sync thread
    */
   public void progressUpdate(int n) {
     progressBar.setValue(progressBar.getValue() + n);
@@ -485,34 +505,24 @@ public class MapFrame extends JFrame {
   }
 
   @Override
-  public void setVisible(boolean b) {
-    super.setVisible(b);
+  public void setVisible(boolean visible) {
+    super.setVisible(visible);
     passPolys(new GshhsReader().newPolyList("maps/gshhs_l.b"));
     passBorders(new GshhsReader().newPolyList("maps/wdb_borders_l.b"));
     addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent e) {
         storeSettings();
-        terraMaster.getProps().setProperty(TerraMasterProperties.LOG_LEVEL, log.getParent().getLevel().getName());
+        terraMaster.getProps().setProperty(TerraMasterProperties.LOG_LEVEL, LOG.getParent().getLevel().getName());
         try {
           terraMaster.getProps().store(new FileWriter("terramaster.properties"), null);
         } catch (Exception x) {
-          log.log(Level.WARNING, "Couldn't store settings {0}", x);
+          LOG.log(Level.WARNING, "Couldn't store settings {0}", x);
           JOptionPane.showMessageDialog(null, "Couldn't store Properties " + x, "Error",
               JOptionPane.ERROR_MESSAGE);
         }
-        log.info("Shut down Terramaster");
+        LOG.info("Shut down Terramaster");
       }
     });
-
-    if (b && terraMaster.getMapScenery() == null) {
-
-      JOptionPane.showMessageDialog(this,
-          "Scenery folder not found. Click the gear icon and select the folder containing your scenery files.",
-          "Warning", JOptionPane.WARNING_MESSAGE);
-    } else if (b && terraMaster.getMapScenery().isEmpty()) {
-      JOptionPane.showMessageDialog(this, "Scenery folder is empty.", "Warning", JOptionPane.WARNING_MESSAGE);
-      log.warning("Scenery folder empty.");
-    }
   }
 }

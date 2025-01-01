@@ -46,8 +46,7 @@ public class TestMapFrame {
     tm.frame.progressBar = mockProgress;
     tm.frame.butStop = mock(JButton.class);
     HTTPTerraSync sync = new HTTPTerraSync(tm);
-    mapScenery = sync.newScnMap(scnPath.getAbsolutePath());
-    sync.setScnPath(scnPath);
+    mapScenery = sync.newScnMap();
     sync.start();
     doReturn(sync).when(tm).getTileService();
     doReturn(props).when(tm).getProps();

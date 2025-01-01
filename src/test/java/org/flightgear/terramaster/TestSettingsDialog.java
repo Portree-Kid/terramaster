@@ -51,7 +51,6 @@ public class TestSettingsDialog {
 
     HTTPTerraSync ts = new HTTPTerraSync(tm);
     ts.start();
-    ts.setScnPath(scnDir);
     
     doReturn(ts).when(tm).getTileService();
     
@@ -81,7 +80,7 @@ public class TestSettingsDialog {
         sd.setVisible(true);
       }
     }).start();
-    r.setAutoDelay(200);
+    r.setAutoDelay(4000);
     mouseMove(130, 174);
     r.mousePress(InputEvent.BUTTON1_MASK);
     r.mouseRelease(InputEvent.BUTTON1_MASK);

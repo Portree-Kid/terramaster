@@ -11,3 +11,6 @@
 /.idea
 /LIB
 .vscode/settings.json
+/nbactions.xml
+/nb-configuration.xml
+/.vscode/

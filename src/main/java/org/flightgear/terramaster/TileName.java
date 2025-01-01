@@ -3,63 +3,76 @@ package org.flightgear.terramaster;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Class representing a tile of scenery in the "e000s00" format and convenience
  * methods for converting between lat,lon and "e000s00" formats.
  */
 
-public class TileName implements Comparable<TileName>, Serializable, Syncable {
-  private int lat;
-  private int lon;
+public class TileName extends Syncable implements Comparable<TileName>, Serializable {
+
+  public static final String TILENAME_PATTERN = "([ew])(\\d{3})([ns])(\\d{2})";
+  private final int lat;
+  private final int lon;
   /** String representing this tile. */
-  private String name;
+  private final String name;
   
   /**The types being synced. Not part of HashCode/Equals!*/
-  private TerraSyncDirectoryType[] types;
+  private HashMap<TerraSyncRootDirectoryType,TerraSyncDirectoryType[]>  typesMap = new HashMap<>();
 
-  private static HashMap<String, TileName> tilenameMap;
+  private final static HashMap<String, TileName> tilenameMap;
 
   // creates a hashtable of all possible 1x1 tiles in the world
   static {
     tilenameMap = new HashMap<>();
 
     for (int x = -180; x < 180; ++x) {
-      for (int y = -90; y < 90; ++y) {
-        TileName t = new TileName(y, x);
+      for (int y = -90; y <= 90; ++y) {
+        TileName t = new TileName("---", y, x);
         tilenameMap.put(t.getName(), t);
       }
     }
   }
+  
+  /**
+   * 
+   * @param basePath The path this tile resides in (WS2/WS3). 
+   * @param lat
+   * @param lon 
+   */
 
-  public TileName(int lat, int lon) {
+  public TileName(String basePath, int lat, int lon) {
+    super(basePath);
     this.lat = lat;
     this.lon = lon;
     name = computeTileName(lat, lon);
-    types = new TerraSyncDirectoryType[] {TerraSyncDirectoryType.TERRAIN};
   }
 
-  public TileName(String name) {
+  public TileName(String basePath, String name) {
+    super(basePath);
     this.name = name;
-    types = new TerraSyncDirectoryType[] {TerraSyncDirectoryType.TERRAIN};
     Pattern p = Pattern.compile("([ew])(\\p{Digit}{3})([ns])(\\p{Digit}{2})");
     Matcher m = p.matcher(name);
     if (m.matches()) {
-      int lon = Integer.parseInt(m.group(2));
-      int lat = Integer.parseInt(m.group(4));
+      final int lon = Integer.parseInt(m.group(2));
+      final int lat = Integer.parseInt(m.group(4));
       this.lon = m.group(1).equals("w") ? -lon : lon;
       this.lat = m.group(3).equals("s") ? -lat : lat;
     } else
       lat = lon = 0;
   }
 
+  @Override
   public int compareTo(TileName l) {
     return name.compareTo(l.getName());
   }
 
+  @Override
   public String getName() {
     return name;
   }
@@ -114,8 +127,6 @@ public class TileName implements Comparable<TileName>, Serializable, Syncable {
   }
 
   public static TileName getTile(int x, int y) {
-    if( y == 90)
-      return new TileName(y, x);
     return tilenameMap.get(computeTileName(y, x));
   }
 
@@ -234,13 +245,14 @@ public class TileName implements Comparable<TileName>, Serializable, Syncable {
     return true;
   }
 
-  public void setTypes(TerraSyncDirectoryType[] t) {
-    this.types = t;
+  public void setTypes(TerraSyncRootDirectoryType rootType, TerraSyncDirectoryType[] syncTypes) {
+    TerraSyncDirectoryType[] tileTypes = Arrays.stream(syncTypes).filter((t) -> t.isTile()).toArray(TerraSyncDirectoryType[]::new);
+    typesMap.put(rootType, tileTypes);
   }
 
   @Override
-  public TerraSyncDirectoryType[] getTypes() {
-    return types;
+  public TerraSyncDirectoryType[] getTypes(TerraSyncRootDirectoryType rootType) {
+    return typesMap.get(rootType);
   }
   
   

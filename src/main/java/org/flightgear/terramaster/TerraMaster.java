@@ -14,6 +14,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import javax.swing.*;
+import static org.flightgear.terramaster.MapFrame.LOG;
 
 import org.flightgear.terramaster.dns.FlightgearNAPTRQuery;
 import org.flightgear.terramaster.dns.FlightgearNAPTRQuery.HealthStats;
@@ -53,21 +54,31 @@ public class TerraMaster {
       JOptionPane.showMessageDialog(null, "Couldn't load resources", "ERROR", JOptionPane.ERROR_MESSAGE);
       return;
     }
-
-    String path = getProps().getProperty(TerraMasterProperties.SCENERY_PATH);
-    if (path != null) {
-      tileService.setScnPath(new File(path));
-      setMapScenery(tileService.newScnMap(path));
-    } else {
-      setMapScenery(new HashMap<>());
-    }
-
+    (new Thread() {
+      @Override
+      public void run() {
+        setMapScenery(tileService.newScnMap());
+        SwingUtilities.invokeLater(() -> {
+          if (frame != null) {
+            frame.repaint();
+          }
+          if (frame.isVisible() && getMapScenery() == null) {
+            JOptionPane.showMessageDialog(frame,
+                    "Scenery folder not found. Click the gear icon and select the folder containing your scenery files.",
+                    "Warning", JOptionPane.WARNING_MESSAGE);
+          } else if (frame.isVisible() && getMapScenery().isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Scenery folder is empty.", "Warning", JOptionPane.WARNING_MESSAGE);
+            LOG.warning("Scenery folder empty.");
+          }
+        });
+      }      
+    }).start();
     try {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {
       log.log(Level.INFO, "Failed to load system look and feel: ", e);
     }  
-
+    
     frame = new MapFrame(this, "TerraMaster " + getProps().getProperty("version"));
     frame.restoreSettings();
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -102,15 +113,23 @@ public class TerraMaster {
   }
 
   protected void initLoggers() {
-    if (getProps().getProperty(TerraMasterProperties.LOG_LEVEL) != null) {
-      Level newLevel = Level.parse(getProps().getProperty(TerraMasterProperties.LOG_LEVEL));
-      staticLogger.getParent().setLevel(newLevel);
+    if(!getProps().getProperty(TerraMasterProperties.LOG_LEVEL, "").isBlank()) {      
+      try {
+        Level newLevel = Level.parse(getProps().getProperty(TerraMasterProperties.LOG_LEVEL));
+        staticLogger.getParent().setLevel(newLevel);
+      } catch (IllegalArgumentException | SecurityException e) {
+        staticLogger.log(Level.WARNING, "Couldn't load properties : " + e, e);
+      }
     }
   }
 
   protected void startUp() {
     try {
       getProps().load(new FileReader("terramaster.properties"));
+    } catch (IOException e) {
+      staticLogger.log(Level.WARNING, "Couldn't load properties : " + e, e);
+    }
+    try {
       if (getProps().getProperty(TerraMasterProperties.LOG_LEVEL) != null) {
         Logger.getGlobal().getParent().setLevel(Level.INFO);
         Logger.getLogger(TerraMaster.LOGGER_CATEGORY)
@@ -121,8 +140,8 @@ public class TerraMaster {
         Logger.getLogger(TerraMaster.LOGGER_CATEGORY).setLevel(Level.INFO);
         Logger.getGlobal().getParent().setLevel(Level.INFO);
       }
-    } catch (IOException e) {
-      staticLogger.log(Level.WARNING, "Couldn't load properties : " + e, e);
+    } catch (Exception e) {
+      staticLogger.log(Level.WARNING, "Couldn't set LOGGER : " + e, e);
     }
     staticLogger.info("Starting TerraMaster " + getProps().getProperty("version"));
   }
@@ -182,8 +201,10 @@ public class TerraMaster {
   }
 
   private void loadVersion() {
+    
     try (InputStream is = TerraMaster.class
         .getResourceAsStream("/META-INF/maven/org.flightgear/terramaster/pom.properties")) {
+      getProps().remove("version");
       getProps().load(is);
     } catch (IOException e) {
       staticLogger.log(Level.WARNING, "Couldn't load properties : " + e, e);
@@ -223,17 +244,14 @@ public class TerraMaster {
     }
   }
 
-  public TerraSyncDirectoryType[] getSyncTypes() {
+  public TerraSyncDirectoryType[] getSyncTypes(final TerraSyncRootDirectoryType rootType) {
     ArrayList<TerraSyncDirectoryType> types = new ArrayList<>();
-
-    TerraSyncDirectoryType[] enumConstants = TerraSyncDirectoryType.class.getEnumConstants();
-    for (TerraSyncDirectoryType terraSyncDirectoryType : enumConstants) {
-      if (terraSyncDirectoryType.isTile()) {
-        if (Boolean.parseBoolean(getProps().getProperty(terraSyncDirectoryType.name(), "false"))) {
-          types.add(terraSyncDirectoryType);
-        }
-      }
+    
+    String[] enabledTypesString = getProps().getProperty(rootType + "." + TerraMasterProperties.ENABLED_DIRECTORIES, "").split(",");      
+    if (enabledTypesString.length==0||enabledTypesString.length==1||enabledTypesString[0].isBlank()) {
+      return new TerraSyncDirectoryType[0];
     }
-    return types.toArray(new TerraSyncDirectoryType[0]);
+    TerraSyncDirectoryType[] enumConstants = Arrays.stream(enabledTypesString).map((t) -> TerraSyncDirectoryType.valueOf(t)).toArray(TerraSyncDirectoryType[]::new);
+    return enumConstants;
   }
 }

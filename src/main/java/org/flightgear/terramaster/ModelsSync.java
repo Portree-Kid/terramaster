@@ -1,6 +1,10 @@
 package org.flightgear.terramaster;
 
-public class ModelsSync implements Syncable {
+public class ModelsSync extends Syncable {
+
+  public ModelsSync(String basePath) {
+    super(basePath);
+  }
 
   @Override
   public String buildPath() {
@@ -13,7 +17,7 @@ public class ModelsSync implements Syncable {
   }
 
   @Override
-  public TerraSyncDirectoryType[] getTypes() {
+  public TerraSyncDirectoryType[] getTypes(final TerraSyncRootDirectoryType rootType) {
     return new TerraSyncDirectoryType[]{TerraSyncDirectoryType.MODELS};
   }
 

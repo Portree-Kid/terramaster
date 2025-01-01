@@ -1,13 +1,9 @@
 package org.flightgear.terramaster;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 
 public interface TileService {
-
-  /**Set the TerraSync scenery path*/
-	void setScnPath(File file);
 
 	/**Start the Thread*/
 	void start();
@@ -29,5 +25,5 @@ public interface TileService {
 
   void wakeUp();
 
-  Map<TileName, TileData> newScnMap(String path);
+  Map<TileName, TileData> newScnMap();
 }

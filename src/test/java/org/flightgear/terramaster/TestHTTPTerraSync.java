@@ -33,7 +33,7 @@ public class TestHTTPTerraSync {
   private HTTPTerraSync ts;
   private Map<TileName, TileData> mapScenery = new HashMap<>();
   private Properties props = new Properties();
-  private File scnPath = new File("C:\\Users\\keith.paterson\\Documents\\FlightGear\\TerraSync");
+  private File scnPath = new File(System.getProperty("user.home") + File.separator + "flightgear" + File.separator + "terrasync");
 
   @Before
   public void initMocks() throws IOException {
@@ -51,15 +51,15 @@ public class TestHTTPTerraSync {
 
     ts = new HTTPTerraSync(tm);
     ts.start();
-    ts.setScnPath(scnPath);
   }
 
   @Test
   public void testModels() throws InterruptedException {
     File f = new File(scnPath, "Models/Aircraft/a310-tnt.xml");
+    f.getParentFile().mkdirs();
     
     Collection<Syncable> m = new ArrayList<>();
-    m.add(new ModelsSync());
+    m.add(new ModelsSync(props.getProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH)));
     ts.sync(m, true);
     verify(tm.frame.progressBar, timeout(400000).times(1)).setVisible(true);
     verify(tm.frame.progressBar, timeout(400000).times(1)).setVisible(false);
@@ -73,7 +73,7 @@ public class TestHTTPTerraSync {
   @Test
   public void testModelsCancel() throws InterruptedException, AWTException {
     Collection<Syncable> m = new ArrayList<>();
-    m.add(new ModelsSync());
+    m.add(new ModelsSync(props.getProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH)));
     ts.sync(m, true);
     verify(tm.frame.progressBar, timeout(400000).times(1)).setVisible(true);
     ts.cancel();
@@ -88,9 +88,9 @@ public class TestHTTPTerraSync {
   public void testTile() throws InterruptedException {
     Collection<Syncable> m = new ArrayList<>();
     Collection<TileName> tl = new ArrayList<>();
-    TileName t = new TileName("w006n56");
-    t.setTypes(new TerraSyncDirectoryType[] { TerraSyncDirectoryType.BUILDINGS, TerraSyncDirectoryType.OBJECTS,
-        TerraSyncDirectoryType.ROADS, TerraSyncDirectoryType.TERRAIN, TerraSyncDirectoryType.PYLONS });
+    TileName t = new TileName("", "w006n56");
+    t.setTypes(TerraSyncRootDirectoryType.OSM, new TerraSyncDirectoryType[] { TerraSyncDirectoryType.BUILDINGS, TerraSyncDirectoryType.OBJECTS,
+        TerraSyncDirectoryType.ROADS, TerraSyncDirectoryType.PYLONS });
     tl.add(t);
     ts.delete(tl);
     m.add(t);

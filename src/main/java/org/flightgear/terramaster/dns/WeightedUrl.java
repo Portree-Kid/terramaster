@@ -54,6 +54,23 @@ public class WeightedUrl implements Serializable {
   /**
    * 
    * @param weight
+   * @param urlString The url to be used for download
+   */
+
+   public WeightedUrl(String weight, String urlString) {
+    this();
+    try {
+      url = new URL(urlString);
+    } catch (MalformedURLException e) {
+      log.log(Level.WARNING, "URL incorrect " + urlString, e);
+    }
+    this.weight = Integer.parseInt(weight);
+  }
+
+
+  /**
+   * 
+   * @param weight
    * @param regex
    *          The Regex to be used on the QName to get the URL
    * @param qName

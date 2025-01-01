@@ -57,7 +57,6 @@ public class TestFlightplan {
 
     ts = new HTTPTerraSync(tm);
     ts.start();
-    ts.setScnPath(scnDir);
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override

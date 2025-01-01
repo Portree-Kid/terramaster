@@ -3,7 +3,6 @@ package org.flightgear.terramaster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.flightgear.terramaster.TileName;
 import org.junit.Test;
 
 /**
@@ -51,31 +50,31 @@ public class TestTilename {
   
   @Test
   public void test5() {
-    TileName tileName = new TileName(10, 3);
+    TileName tileName = new TileName("", 10, 3);
     assertEquals("e003n10", tileName.getName());
   }
 
   @Test
   public void test6() {
-    TileName tileName = new TileName(10, 3).getNeighbour(1, 1);
+    TileName tileName = new TileName("", 10, 3).getNeighbour(1, 1);
     assertEquals("e004n11", tileName.getName());
   }
 
   @Test
   public void test7() {
-    TileName tileName = new TileName(89, 3).getNeighbour(1, 1);
+    TileName tileName = new TileName("", 89, 3).getNeighbour(1, 1);
     assertEquals("e004n90", tileName.getName());
   }
   @Test
   public void test8() {
-    TileName tileName = new TileName(89, 3).getNeighbour(1, 1).getNeighbour(-1, -1);
+    TileName tileName = new TileName("", 89, 3).getNeighbour(1, 1).getNeighbour(-1, -1);
     assertEquals("e003n89", tileName.getName());
   }
 
   @Test
   public void testEquals() {
-    TileName tileName1 = new TileName(89, 3).getNeighbour(1, -1);
-    TileName tileName2 = new TileName(87, 5).getNeighbour(-1, 1);
+    TileName tileName1 = new TileName("", 89, 3).getNeighbour(1, -1);
+    TileName tileName2 = new TileName("", 87, 5).getNeighbour(-1, 1);
     assertTrue(tileName1.equals(tileName2));
   }
 }

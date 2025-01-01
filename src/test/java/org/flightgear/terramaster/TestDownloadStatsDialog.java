@@ -55,7 +55,6 @@ public class TestDownloadStatsDialog {
 
     HTTPTerraSync ts = new HTTPTerraSync(tm);
     ts.start();
-    ts.setScnPath(scnDir);
     
     doReturn(ts).when(tm).getTileService();
     

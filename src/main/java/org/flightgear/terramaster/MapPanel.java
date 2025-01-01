@@ -41,6 +41,7 @@ import com.jhlabs.map.proj.WinkelTripelProjection;
 
 public class MapPanel extends JPanel {
 
+
   private final class MapKeyAdapter extends KeyAdapter {
     private TileName selstart;
 
@@ -147,6 +148,13 @@ public class MapPanel extends JPanel {
       press = e.getPoint();
       mode = e.getButton();
       requestFocus();
+      switch (e.getButton()) {
+        case MouseEvent.BUTTON3:
+          setCursor(new Cursor(Cursor.MOVE_CURSOR));
+          break;
+        default:
+          break;
+      }
     }
 
     @Override
@@ -154,6 +162,7 @@ public class MapPanel extends JPanel {
       switch (e.getButton()) {
       case MouseEvent.BUTTON3:
         mouseReleasedPanning(e);
+        setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         break;
       case MouseEvent.BUTTON1:
         mouseReleasedSelection(e);
@@ -439,56 +448,39 @@ public class MapPanel extends JPanel {
 
   /**
    * Returns the tooltip for the tile.
+   * @param e
    */
 
   @Override
   public String getToolTipText(MouseEvent e) {
     Point s = e.getPoint();
-    StringBuilder txt = new StringBuilder();
-    StringBuilder str = new StringBuilder();
 
     Double p2 = screen2geo(s);
     TileName t = TileName.getTile(p2);
-    if (t != null)
-      txt = new StringBuilder(t.getName());
+    if (t == null || terraMaster.getMapScenery() == null) {
+      return "";
+    } 
+    StringBuilder txt = new StringBuilder();
 
     // Is it downloaded?
     if (terraMaster.getMapScenery().containsKey(t)) {
       // list Terr, Obj, airports
 
       TileData d = terraMaster.getMapScenery().get(t);
-      txt.insert(0, "<html>");
-
-      for (TerraSyncDirectoryType type : TerraSyncDirectoryType.values()) {
-        if (d.hasDirectory(type)) {
-          txt.append(" +").append(type.getAbbreviation());
-
-          if (type == TerraSyncDirectoryType.TERRAIN) {
-            File f = d.getDir(TerraSyncDirectoryType.TERRAIN);
-            if (f != null && f.exists()) {
-              int count = 0;
-              for (String i : f.list()) {
-                if (i.endsWith(".btg.gz")) {
-                  int n = i.indexOf('.');
-                  if (n > 4)
-                    n = 4;
-                  i = i.substring(0, n);
-                  try {
-                    Short.parseShort(i);
-                  } catch (Exception x) {
-                    str.append(i).append(" ");
-                    if ((++count % 4) == 0)
-                      str.append("<br>");
-                  }
-                }
-              }
-            }
+      txt.append("<html>");
+      txt.append("<B>").append(t.getName()).append("</B>");
+      for (TerraSyncRootDirectoryType rootType : TerraSyncRootDirectoryType.values()) {
+        StringBuffer line = new StringBuffer();
+        for (TerraSyncDirectoryType type : TerraSyncDirectoryType.values()) {
+          if (d.hasDirectory(rootType, type)) {
+            line.append(" +").append(type.getAbbreviation());
           }
         }
+        if (line.length()>0) {
+          txt.append("<BR>").append("<B>").append(rootType.name()).append("</B>");
+          txt.append(line);
+        }
       }
-
-      if (str.length() > 0)
-        txt.append("<br>").append(str);
 
       txt.append("</html>");
       mapFrame.tileindex.setText(t.getName() + " (" + TileName.getTileIndex(p2) + ")");
@@ -699,12 +691,12 @@ public class MapPanel extends JPanel {
     if (terraMaster.getMapScenery() == null)
       return;
     Set<TileName> keys = terraMaster.getMapScenery().keySet();
-    Pattern p = Pattern.compile("([ew])(\\d{3})([ns])(\\d{2})");
+    Pattern p = Pattern.compile(TileName.TILENAME_PATTERN);
 
-    for (TileName n : keys) {
-      if (n == null)
+    for (TileName tilename : keys) {
+      if (tilename == null)
         continue;
-      Matcher m = p.matcher(n.getName());
+      Matcher m = p.matcher(tilename.getName());
       if (m.matches()) {
         int lon = Integer.parseInt(m.group(2));
         int lat = Integer.parseInt(m.group(4));
@@ -712,11 +704,11 @@ public class MapPanel extends JPanel {
         lat = m.group(3).equals("s") ? -lat : lat;
 
         Polygon poly = getBox(lon, lat);
-        TileData t = terraMaster.getMapScenery().get(n);
-        t.poly = poly;
-        if (poly != null) {
-          if (t.hasAllDirTypes(terraMaster.getSyncTypes()))
+        TileData t = terraMaster.getMapScenery().get(tilename);
+        if (poly != null) {          
+          if (hasAllDirs(t)) {
             g.setColor(Color.green);
+          }
           else
             g.setColor(Color.yellow);
           g.drawPolygon(poly);
@@ -858,6 +850,7 @@ public class MapPanel extends JPanel {
     borders = p;
   }
 
+  @Override
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
     if (offScreen == null) {
@@ -961,5 +954,13 @@ public class MapPanel extends JPanel {
     terraMaster.getProps().setProperty(TerraMasterProperties.PROJECTION_LAT, java.lang.Double.toString(projectionLatitude));
     terraMaster.getProps().setProperty(TerraMasterProperties.PROJECTION_LON, java.lang.Double.toString(projectionLongitude));
     terraMaster.getProps().setProperty(TerraMasterProperties.FROM_METRES, java.lang.Double.toString(fromMetres));
+  }
+
+  private boolean hasAllDirs(TileData t) {
+    boolean ret = true;
+    for (TerraSyncRootDirectoryType value : TerraSyncRootDirectoryType.values()) {
+      ret = ret && t.hasAllDirTypes(value, terraMaster.getSyncTypes(value));
+    }
+    return ret;
   }
 }

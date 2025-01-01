@@ -18,6 +18,7 @@ import javax.swing.SwingWorker;
 import org.flightgear.terramaster.VersionChecker.Version;
 
 import com.jayway.jsonpath.JsonPath;
+import java.util.Objects;
 
 public class VersionChecker extends SwingWorker<Version, Object>{
   Logger log = Logger.getLogger(TerraMaster.LOGGER_CATEGORY);
@@ -84,10 +85,12 @@ public class VersionChecker extends SwingWorker<Version, Object>{
       for (int i = 0; i < length; i++) {
         int thisPart = i < thisParts.length ? Integer.parseInt(thisParts[i]) : 0;
         int thatPart = i < thatParts.length ? Integer.parseInt(thatParts[i]) : 0;
-        if (thisPart < thatPart)
+        if (thisPart < thatPart) {
           return -1;
-        if (thisPart > thatPart)
+        }
+        if (thisPart > thatPart) {
           return 1;
+        }
       }
       return 0;
     }
@@ -103,6 +106,13 @@ public class VersionChecker extends SwingWorker<Version, Object>{
       return this.compareTo((Version) that) == 0;
     }
 
+    @Override
+    public int hashCode() {
+      int hash = 5;
+      hash = 97 * hash + Objects.hashCode(this.version);
+      return hash;
+    }
+
   }
 
   @Override
@@ -110,9 +120,9 @@ public class VersionChecker extends SwingWorker<Version, Object>{
 
     Version v = getMaxVersion();
     Version localVersion = loadVersion();
-    boolean update = v.compareTo(localVersion)<0;
-    log.log(Level.INFO, "Remote Version " + v + " Local Version " + localVersion);
-    if(!update) {
+    boolean update = v.compareTo(localVersion)>0;
+    log.log(Level.INFO, "Remote {0} Local {1}", new Object[]{v, localVersion});
+    if(update) {
       JOptionPane.showMessageDialog(null, "Version " + v.version + " available", "Version", JOptionPane.INFORMATION_MESSAGE, null);
     }
     return null;

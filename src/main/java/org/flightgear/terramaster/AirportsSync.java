@@ -2,15 +2,17 @@ package org.flightgear.terramaster;
 
 import java.io.File;
 
-public class AirportsSync implements Syncable {
+public class AirportsSync extends Syncable {
 
   private final String icaoPart;
 
-  public AirportsSync(String icaoPart) {
+  public AirportsSync(String path, String icaoPart) {
+    super(path);
     this.icaoPart = icaoPart;
   }
 
-  public AirportsSync() {
+  public AirportsSync(String path) {
+    super(path);
     icaoPart = "";
   }
 
@@ -29,7 +31,7 @@ public class AirportsSync implements Syncable {
   }
 
   @Override
-  public TerraSyncDirectoryType[] getTypes() {
+  public TerraSyncDirectoryType[] getTypes(final TerraSyncRootDirectoryType rootType) {
     return new TerraSyncDirectoryType[]{TerraSyncDirectoryType.AIRPORTS};
   }
 
