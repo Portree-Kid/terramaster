@@ -112,6 +112,72 @@ public class TerraMaster {
 
   }
 
+    /**
+   * Migrate an old version of the settings
+   */
+  private void migrateSettings() {
+    ArrayList<TerraSyncDirectoryType> enabledTypes = new ArrayList<>();
+    
+    for (TerraSyncDirectoryType value : TerraSyncDirectoryType.values()) {
+      boolean enabled = Boolean.parseBoolean(getProps().getProperty(value.name(),"false"));
+      if (enabled) {
+        enabledTypes.add(value);
+      }
+      getProps().remove(value.name());
+    }
+    getProps().remove("SceneryVersion");
+    
+    String path = getProps().getProperty(TerraMasterProperties.SCENERY_PATH);
+    for (String version : getProps().getProperty(TerraMasterProperties.SCENERY_VERSION,
+            TerraMasterProperties.DEFAULT_SCENERY_VERSION).split(",")) {
+      switch (version) {
+        case "":
+          {
+            getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.SCENERY_PATH , path);      
+            String enabledTypesString = String.join(",", enabledTypes.stream().filter((t) -> t.isInRoot(TerraSyncRootDirectoryType.OSM)).map(t -> t.name()).toList());
+            getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
+            getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.ENABLED , "true");                  
+            
+            getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH , path);      
+            enabledTypesString = String.join(",", enabledTypes.stream().filter((t) -> t.isInRoot(TerraSyncRootDirectoryType.WS20)).map(t -> t.name()).toList());
+            getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
+            getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED , "true");                  
+          }
+          break;
+        case "ws2":
+        case "ws20":
+          {
+            getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH , path);      
+            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).toList());
+            getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
+            getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED , "true");                  
+          }
+          break;
+        case "ws3":
+        case "ws30":
+          {
+            getProps().setProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.SCENERY_PATH , path);      
+            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).toList());
+            getProps().setProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
+            getProps().setProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.ENABLED , "true");      
+          }
+          break;
+        case "o2c":
+          {
+            getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.SCENERY_PATH , path);      
+            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).toList());
+            getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
+            getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.ENABLED , "true");      
+          }
+          break;
+        default:
+          log.log(Level.WARNING, "Wrong Version " + version);
+      }
+    }
+    getProps().remove(TerraMasterProperties.SERVER_TYPE);
+    getProps().remove(TerraMasterProperties.SCENERY_PATH);
+  }
+
   protected void initLoggers() {
     if(!getProps().getProperty(TerraMasterProperties.LOG_LEVEL, "").isBlank()) {      
       try {
@@ -126,6 +192,10 @@ public class TerraMaster {
   protected void startUp() {
     try {
       getProps().load(new FileReader("terramaster.properties"));
+      if (getProps().containsKey(TerraMasterProperties.SCENERY_PATH)) {
+        migrateSettings();
+      }
+      
     } catch (IOException e) {
       staticLogger.log(Level.WARNING, "Couldn't load properties : " + e, e);
     }

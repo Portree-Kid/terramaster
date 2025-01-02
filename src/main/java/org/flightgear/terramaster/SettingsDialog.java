@@ -6,9 +6,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -206,63 +204,8 @@ public class SettingsDialog extends JDialog {
     }
   }
 
-  /**
-   * Migrate an old version of the settings
-   */
-  private void migrateValues() {
-    ArrayList<TerraSyncDirectoryType> enabledTypes = new ArrayList<>();
-    
-    for (TerraSyncDirectoryType value : TerraSyncDirectoryType.values()) {
-      boolean enabled = Boolean.parseBoolean(terraMaster.getProps().getProperty(value.name(),"false"));
-      if (enabled) {
-        enabledTypes.add(value);
-      }
-    }
-    
-    String path = terraMaster.getProps().getProperty(TerraMasterProperties.SCENERY_PATH);
-    for (String version : terraMaster.getProps().getProperty(TerraMasterProperties.SCENERY_VERSION,
-            TerraMasterProperties.DEFAULT_SCENERY_VERSION).split(",")) {
-      switch (version) {
-        case "":
-        case "ws2":
-        case "ws20":
-          {
-            terraMaster.getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH , path);      
-            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).toList());
-            terraMaster.getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
-            terraMaster.getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED , "true");                  
-          }
-          break;
-        case "ws3":
-        case "ws30":
-          {
-            terraMaster.getProps().setProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.SCENERY_PATH , path);      
-            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).toList());
-            terraMaster.getProps().setProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
-            terraMaster.getProps().setProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.ENABLED , "true");      
-          }
-          break;
-        case "o2c":
-          {
-            terraMaster.getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.SCENERY_PATH , path);      
-            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).toList());
-            terraMaster.getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
-            terraMaster.getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.ENABLED , "true");      
-          }
-          break;
-        default:
-          log.log(Level.WARNING, "Wrong Version " + version);
-      }
-    }
-    terraMaster.getProps().remove(TerraMasterProperties.SERVER_TYPE);
-    terraMaster.getProps().remove(TerraMasterProperties.SCENERY_PATH);
-  }
 
   private void restoreValues() {
-    if (terraMaster.getProps().containsKey(TerraMasterProperties.SCENERY_PATH)) {
-      migrateValues();
-    }
-
     root = log;
     while (root.getParent() != null) {
       root = root.getParent();
