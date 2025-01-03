@@ -85,8 +85,8 @@ public class DownloadResultDialog extends JDialog {
     sb.append("<HTML>");
     for (Entry<WeightedUrl, TileResult> entry : completeStats.entrySet()) {
       sb.append("<H3>" + entry.getKey().getUrl().toExternalForm() + "</H3>");
-      sb.append("404s " + entry.getValue().errors + " Downloads " + entry.getValue().actualDownloads + " Equal "
-          + entry.getValue().equal + "<BR>");
+      sb.append("404s " + entry.getValue().notFound + " Downloads " + entry.getValue().actualDownloads + " Equal "
+          + entry.getValue().equal + " Errors " + entry.getValue().errors  + "<BR>");
       sb.append(String.format("Dowloaded %s in %4.2f seconds<BR>", getBytes(entry.getValue().numberBytes),
           (double) entry.getValue().time / 1000));
       if (entry.getValue().time > 1000) {

@@ -148,7 +148,6 @@ public class MapFrame extends JFrame {
           if (Boolean.parseBoolean(props.getProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED))) {
             set.add(new ModelsSync(props.getProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH)));
             set.add(new AirportsSync(props.getProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH)));
-            set.add(new NavDataSync(props.getProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH)));
           }
           if (Boolean.parseBoolean(terraMaster.getProps().getProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.ENABLED))) {
             set.add(new ModelsSync(props.getProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.SCENERY_PATH)));

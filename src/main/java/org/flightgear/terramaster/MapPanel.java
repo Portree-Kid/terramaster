@@ -458,7 +458,7 @@ public class MapPanel extends JPanel {
     Double p2 = screen2geo(s);
     TileName t = TileName.getTile(p2);
     if (t == null || terraMaster.getMapScenery() == null) {
-      return "";
+      return null;
     } 
     StringBuilder txt = new StringBuilder();
 
@@ -471,14 +471,39 @@ public class MapPanel extends JPanel {
       txt.append("<B>").append(t.getName()).append("</B>");
       for (TerraSyncRootDirectoryType rootType : TerraSyncRootDirectoryType.values()) {
         StringBuffer line = new StringBuffer();
+        String airportString = "";
         for (TerraSyncDirectoryType type : TerraSyncDirectoryType.values()) {
           if (d.hasDirectory(rootType, type)) {
             line.append(" +").append(type.getAbbreviation());
+          }
+          if (type == TerraSyncDirectoryType.TERRAIN) {
+            File f = d.getDir(rootType, TerraSyncDirectoryType.TERRAIN);
+            if (f != null && f.exists()) {
+              int count = 0;
+              for (String i : f.list()) {
+                if (i.endsWith(".btg.gz")) {
+                  int n = i.indexOf('.');
+                  if (n > 4) {
+                    n = 4;
+                  }
+                  i = i.substring(0, n);
+                  if (!i.matches("[0-9]*")) {
+                    airportString += i + " ";
+                    if (count++>0 && count%4==0) {
+                      airportString += "<BR>";
+                    }
+                  }
+                }
+              }
+            }
           }
         }
         if (line.length()>0) {
           txt.append("<BR>").append("<B>").append(rootType.name()).append("</B>");
           txt.append(line);
+          if (airportString.length()>2) {
+            txt.append("<BR>").append(airportString);
+          }
         }
       }
 

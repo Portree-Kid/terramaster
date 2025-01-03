@@ -29,6 +29,7 @@ public class TileResult {
   public long numberBytes;
   public long time;
   public int errors;
+  public int notFound;
 
   public TileResult(WeightedUrl url) {
     this.url = url;

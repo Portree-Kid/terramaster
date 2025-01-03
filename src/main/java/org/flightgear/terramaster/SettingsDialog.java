@@ -191,7 +191,6 @@ public class SettingsDialog extends JDialog {
             revalidate();
             Dimension dim = getSize();
             dim.setSize(dim.width, dim.height + syncPanel.getHeight());
-            System.out.println(dim);
             setSize(dim);
             revalidate();
           }
@@ -215,14 +214,6 @@ public class SettingsDialog extends JDialog {
     tileage
             .setText("" + (Integer.parseInt(terraMaster.getProps().getProperty(TerraMasterProperties.MAX_TILE_AGE, "100"))
                     / (24 * 3600)));
-    for (TerraSyncRootDirectoryType t : TerraSyncRootDirectoryType.values()) {
-      String path = terraMaster.getProps().getProperty(t.name() + "." + TerraMasterProperties.SCENERY_PATH, null);
-      
-    }
-    for (String version : terraMaster.getProps().getProperty(TerraMasterProperties.SCENERY_VERSION,
-            TerraMasterProperties.DEFAULT_SCENERY_VERSION).split(",")) {
-      System.out.println(version);
-    }
   }
 
   private void saveValues() {

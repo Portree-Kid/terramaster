@@ -692,6 +692,8 @@ public class HTTPTerraSync extends Thread implements TileService {
           return 0;
         try (FileOutputStream fos = new FileOutputStream(localFile.getAbsolutePath())) {
             fos.write(fileContent);
+        } catch (Exception e) {
+          downloadStats.get(filebaseUrl).errors += 1;
         }
         return fileContent.length;
     }
