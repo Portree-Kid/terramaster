@@ -7,7 +7,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
@@ -32,6 +32,7 @@ public class SettingsDialog extends JDialog {
   private final JTextField tileage;
   private final TerraMaster terraMaster;
   private String[] directories = new String[0];
+  private final JButton okButton;
 
   {
     levels.add(Level.ALL);
@@ -65,7 +66,7 @@ public class SettingsDialog extends JDialog {
       buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
       getContentPane().add(buttonPane, BorderLayout.SOUTH);
       {
-        JButton okButton = new JButton("OK");
+        okButton = new JButton("OK");
         okButton.addActionListener(e -> {
           setVisible(false);
           saveValues();
@@ -74,6 +75,7 @@ public class SettingsDialog extends JDialog {
         okButton.setActionCommand("OK");
         buttonPane.add(okButton);
         getRootPane().setDefaultButton(okButton);
+        okButton.setEnabled(false);
       }
       {
         JButton cancelButton = new JButton("Cancel");
@@ -158,12 +160,12 @@ public class SettingsDialog extends JDialog {
     {
       new Thread(() -> {
         try {
+          okButton.setEnabled(false);
           directories = ApacheDirectoryParser.listDirectories(new URL("http://terramaster.flightgear.org/terrasync/"));
           Component[] c = contentPanel.getComponents();
           for (Component component : c) {
             final GridBagLayout layout = (GridBagLayout) contentPanel.getLayout();
             GridBagConstraints constraints = layout.getConstraints(component);
-            System.out.println(component.getName());
             constraints.gridy += directories.length + 1;
             layout.setConstraints(component, constraints);
           }
@@ -196,7 +198,13 @@ public class SettingsDialog extends JDialog {
           }
 
           restoreValues();
-        } catch (MalformedURLException ex) {
+          okButton.setEnabled(true);
+        } catch (IOException ex) {
+          okButton.setEnabled(false);
+            JOptionPane.showMessageDialog(terraMaster.frame,
+          ex.toString(),
+          "Error", JOptionPane.ERROR_MESSAGE);
+                   
           Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
         }
       }).start();
