@@ -496,6 +496,10 @@ public class MapFrame extends JFrame {
     repaint();
   }
 
+  public void passRivers(List<MapPoly> p) {
+    map.passRivers(p);
+    repaint();
+  }
   /**
    * called from Sync thread
    */
@@ -508,8 +512,9 @@ public class MapFrame extends JFrame {
   @Override
   public void setVisible(boolean visible) {
     super.setVisible(visible);
-    passPolys(new GshhsReader().newPolyList("maps/gshhs_l.b"));
-    passBorders(new GshhsReader().newPolyList("maps/wdb_borders_l.b"));
+    passPolys(new GshhsReader().newPolyList("maps/gshhs_i.b"));
+    passBorders(new GshhsReader().newPolyList("maps/wdb_borders_i.b"));
+    passRivers(new GshhsReader().newPolyList("maps/wdb_rivers_i.b"));
     addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent e) {

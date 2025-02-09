@@ -300,6 +300,7 @@ public class MapPanel extends JPanel {
 
   private List<MapPoly> continents;  
   private List<MapPoly> borders;
+  private List<MapPoly> rivers;
   transient MouseAdapter mousehandler;
 
   double scale;
@@ -809,6 +810,16 @@ public class MapPanel extends JPanel {
           g2.drawPolyline(xp, yp, n);
       }
     }
+    // rivers
+    g2.setColor(sea);
+    if (rivers != null) {
+      for (MapPoly s : rivers) {
+        int[] xp = new int[s.npoints], yp = new int[s.npoints];
+        int n = convertPolyline(s, xp, yp);
+        if (n != 0)
+          g2.drawPolyline(xp, yp, n);
+      }
+    }
   }
 
   // in: MapPoly
@@ -873,6 +884,10 @@ public class MapPanel extends JPanel {
 
   void passBorders(List<MapPoly> p) {
     borders = p;
+  }
+
+  void passRivers(List<MapPoly> p) {
+    rivers = p;
   }
 
   @Override

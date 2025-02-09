@@ -264,7 +264,7 @@ public class HTTPTerraSync extends Thread implements TileService {
                       final String basePath;
                       if (syncable instanceof TileName) {
                         basePath = terraMaster.getProps().getProperty(rootType + "." + TerraMasterProperties.SCENERY_PATH);
-                        if (basePath==null||basePath.isBlank()) {
+                        if (basePath==null||basePath.isEmpty()) {
                           continue;
                         }
                       } else {
@@ -415,7 +415,7 @@ public class HTTPTerraSync extends Thread implements TileService {
                 String[] parts = path.replace("\\", "/").replace("//", "/").split("/");
                 String tileName = parts[parts.length - 1];
                 String pathType = parentTypeLookup.get(tileName);
-                if (pathType==null||pathType.isBlank()) {
+                if (pathType==null||pathType.isEmpty()) {
                   log.log(Level.WARNING, () -> "Couldn't process " + path + " type empty");
                   return updates;
                 }

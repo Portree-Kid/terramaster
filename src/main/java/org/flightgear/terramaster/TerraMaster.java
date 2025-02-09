@@ -12,6 +12,7 @@ import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 import static org.flightgear.terramaster.MapFrame.LOG;
@@ -48,7 +49,7 @@ public class TerraMaster {
 
   void createAndShowGUI() {
     // find our jar
-    java.net.URL url = getClass().getClassLoader().getResource("maps/gshhs_l.b");
+    java.net.URL url = getClass().getClassLoader().getResource("maps/gshhs_i.b");
     log.log(Level.FINE, "getResource: {0}", url);
     if (url == null) {
       JOptionPane.showMessageDialog(null, "Couldn't load resources", "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -134,12 +135,12 @@ public class TerraMaster {
         case "":
           {
             getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.SCENERY_PATH , path);      
-            String enabledTypesString = String.join(",", enabledTypes.stream().filter((t) -> t.isInRoot(TerraSyncRootDirectoryType.OSM)).map(t -> t.name()).toList());
+            String enabledTypesString = String.join(",", enabledTypes.stream().filter((t) -> t.isInRoot(TerraSyncRootDirectoryType.OSM)).map(t -> t.name()).collect(Collectors.toList()));
             getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
             getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.ENABLED , "true");                  
             
             getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH , path);      
-            enabledTypesString = String.join(",", enabledTypes.stream().filter((t) -> t.isInRoot(TerraSyncRootDirectoryType.WS20)).map(t -> t.name()).toList());
+            enabledTypesString = String.join(",", enabledTypes.stream().filter((t) -> t.isInRoot(TerraSyncRootDirectoryType.WS20)).map(t -> t.name()).collect(Collectors.toList()));
             getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
             getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED , "true");                  
           }
@@ -148,7 +149,7 @@ public class TerraMaster {
         case "ws20":
           {
             getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.SCENERY_PATH , path);      
-            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).toList());
+            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).collect(Collectors.toList()));
             getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
             getProps().setProperty(TerraSyncRootDirectoryType.WS20 + "." + TerraMasterProperties.ENABLED , "true");                  
           }
@@ -157,7 +158,7 @@ public class TerraMaster {
         case "ws30":
           {
             getProps().setProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.SCENERY_PATH , path);      
-            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).toList());
+            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).collect(Collectors.toList()));
             getProps().setProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
             getProps().setProperty(TerraSyncRootDirectoryType.WS30 + "." + TerraMasterProperties.ENABLED , "true");      
           }
@@ -165,7 +166,7 @@ public class TerraMaster {
         case "o2c":
           {
             getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.SCENERY_PATH , path);      
-            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).toList());
+            String enabledTypesString = String.join(",", enabledTypes.stream().map(t -> t.name()).collect(Collectors.toList()));
             getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.ENABLED_DIRECTORIES , enabledTypesString);      
             getProps().setProperty(TerraSyncRootDirectoryType.OSM + "." + TerraMasterProperties.ENABLED , "true");      
           }
@@ -179,7 +180,7 @@ public class TerraMaster {
   }
 
   protected void initLoggers() {
-    if(!getProps().getProperty(TerraMasterProperties.LOG_LEVEL, "").isBlank()) {      
+    if(!getProps().getProperty(TerraMasterProperties.LOG_LEVEL, "").isEmpty()) {      
       try {
         Level newLevel = Level.parse(getProps().getProperty(TerraMasterProperties.LOG_LEVEL));
         staticLogger.getParent().setLevel(newLevel);
@@ -318,7 +319,7 @@ public class TerraMaster {
     ArrayList<TerraSyncDirectoryType> types = new ArrayList<>();
     
     String[] enabledTypesString = getProps().getProperty(rootType + "." + TerraMasterProperties.ENABLED_DIRECTORIES, "").split(",");      
-    if (enabledTypesString.length==0||enabledTypesString.length==1||enabledTypesString[0].isBlank()) {
+    if (enabledTypesString.length==0||enabledTypesString.length==1||enabledTypesString[0].isEmpty()) {
       return new TerraSyncDirectoryType[0];
     }
     TerraSyncDirectoryType[] enumConstants = Arrays.stream(enabledTypesString).map((t) -> TerraSyncDirectoryType.valueOf(t)).toArray(TerraSyncDirectoryType[]::new);

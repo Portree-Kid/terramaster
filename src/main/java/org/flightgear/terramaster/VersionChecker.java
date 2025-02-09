@@ -22,7 +22,7 @@ import java.util.Objects;
 
 public class VersionChecker extends SwingWorker<Version, Object>{
   Logger log = Logger.getLogger(TerraMaster.LOGGER_CATEGORY);
-  private TerraMaster terramaster;
+  private final TerraMaster terramaster;
   
   public VersionChecker(TerraMaster tm) {
     terramaster = tm;
@@ -40,10 +40,10 @@ public class VersionChecker extends SwingWorker<Version, Object>{
         Collections.sort(ret);
         return ret;
       } catch (Exception e) {
-        e.printStackTrace();
+        log.log(Level.SEVERE, "Couldn't get Version", e);
       }
     } catch (IOException e1) {
-      e1.printStackTrace();
+        log.log(Level.SEVERE, "Couldn't get Version", e1);
     }
     return null;
   }

@@ -18,34 +18,30 @@ public class ApacheDirectoryParser {
 
   private final static String HREF_REGEX = "href=\"([a-zA-Z0-9]*)\\/\"";
 
-  public static String[] listDirectories(URL url) {
-    try {
-      ArrayList<String> ret = new ArrayList<>();
-      String s = getFile(url);
+  public static String[] listDirectories(URL url) throws IOException {
+    ArrayList<String> ret = new ArrayList<>();
+    String s = getFile(url);
 
-      int tableStart = s.indexOf("<table>");
-      int tableEnd = s.indexOf("</table>");
-      if (tableStart > 0 && tableEnd > 0) {
-        String[] tableString = s.substring(tableStart + 7, tableEnd).split("<tr>");
-        Pattern p = Pattern.compile(HREF_REGEX);
-        for (String line : tableString) {
-          if (line.indexOf("[DIR]") > 0) {
-            Matcher m = p.matcher(line);
-            m.find();
-            String group = m.group(1);
-            ret.add(group);
-          }
+    int tableStart = s.indexOf("<table>");
+    int tableEnd = s.indexOf("</table>");
+    if (tableStart > 0 && tableEnd > 0) {
+      String[] tableString = s.substring(tableStart + 7, tableEnd).split("<tr>");
+      Pattern p = Pattern.compile(HREF_REGEX);
+      for (String line : tableString) {
+        if (line.indexOf("[DIR]") > 0) {
+          Matcher m = p.matcher(line);
+          m.find();
+          String group = m.group(1);
+          ret.add(group);
         }
-
-        return ret.toArray(new String[] {});
       }
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.getMessage(), e);
+
+      return ret.toArray(new String[] {});
     }
     return new String[] {};
   }
 
-  public static TerraSyncRootDirectory getType(URL url, String dirName) {
+  public static TerraSyncRootDirectory getType(URL url, String dirName) throws IOException {
     try {
       URL url2 = new URL(url, dirName + "/.dirindex");
       String dirindex = getFile(url2);      
@@ -75,42 +71,37 @@ public class ApacheDirectoryParser {
     return types.toArray(new TerraSyncDirectoryType[0]);
   }
 
-  private static String getFile(URL url) {
-    try {
-      log.finest(() -> "Downloading : " + url.toExternalForm());
-      HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-      httpConn.setConnectTimeout(10000);
-      httpConn.setReadTimeout(20000);
-      int responseCode = (httpConn).getResponseCode();
+  private static String getFile(URL url) throws IOException {
+    log.finest(() -> "Downloading : " + url.toExternalForm());
+    HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+    httpConn.setConnectTimeout(10000);
+    httpConn.setReadTimeout(20000);
+    int responseCode = (httpConn).getResponseCode();
 
-      if (responseCode == HttpURLConnection.HTTP_OK) {
-        String contentType = httpConn.getContentType();
-        int contentLength = httpConn.getContentLength();
+    if (responseCode == HttpURLConnection.HTTP_OK) {
+      String contentType = httpConn.getContentType();
+      int contentLength = httpConn.getContentLength();
 
-        log.finest(() -> "Content-Type = " + contentType);
-        log.finest(() -> "Content-Length = " + contentLength);
+      log.finest(() -> "Content-Type = " + contentType);
+      log.finest(() -> "Content-Length = " + contentLength);
 
-        // opens input stream from the HTTP connection
-        InputStream inputStream = httpConn.getInputStream();
+      // opens input stream from the HTTP connection
+      InputStream inputStream = httpConn.getInputStream();
 
-        // opens an output stream to save into file
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      // opens an output stream to save into file
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        int bytesRead;
-        byte[] buffer = new byte[1024];
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-          outputStream.write(buffer, 0, bytesRead);
-        }
-
-        String s = new String(outputStream.toByteArray());
-        outputStream.close();
-        inputStream.close();
-        return s;
+      int bytesRead;
+      byte[] buffer = new byte[1024];
+      while ((bytesRead = inputStream.read(buffer)) != -1) {
+        outputStream.write(buffer, 0, bytesRead);
       }
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+
+      String s = new String(outputStream.toByteArray());
+      outputStream.close();
+      inputStream.close();
+      return s;
     }
-    return null;
+    return "";
   }
 }

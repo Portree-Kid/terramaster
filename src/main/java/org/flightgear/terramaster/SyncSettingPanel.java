@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -181,7 +182,7 @@ public class SyncSettingPanel extends javax.swing.JPanel {
 
   boolean save(Properties props) {
     props.setProperty(this.dirType + "." + TerraMasterProperties.SCENERY_PATH, this.dirname.getText());    
-    String enabledTypesString = String.join(",", Arrays.stream(getDirEnabled()).map(t -> t.name()).toList());
+    String enabledTypesString = String.join(",", Arrays.stream(getDirEnabled()).map(t -> t.name()).collect(Collectors.toList()));
     props.setProperty(this.dirType + "." + TerraMasterProperties.ENABLED_DIRECTORIES, enabledTypesString);    
     props.setProperty(this.dirType + "." + TerraMasterProperties.ENABLED, Boolean.toString(enabled.isSelected()));    
     props.setProperty(this.dirType + "." + TerraMasterProperties.URL, labelURL.getText());    
