@@ -1,5 +1,6 @@
 package org.flightgear.terramaster;
 
+import java.io.IOException;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -23,13 +24,13 @@ public class TestApacheDirectoryParser {
     }
 
     @Test
-        public void testApacheDirectoryParser() throws MalformedURLException {
-            String[] result = ApacheDirectoryParser.listDirectories(rootURL);
+        public void testApacheDirectoryParser() throws MalformedURLException, IOException {
+        String[] result = ApacheDirectoryParser.listDirectories(rootURL);
         assertNotEquals(0, result.length);
     }
 
     @Test
-    public void testApacheDirectoryParserRoot() throws MalformedURLException {
+    public void testApacheDirectoryParserRoot() throws MalformedURLException, IOException {
         String[] result = ApacheDirectoryParser.listDirectories(rootURL);
         assertNotEquals(0, result.length);
         for (String string : result) {
